@@ -1,0 +1,15 @@
+{
+  "name": "@glassbox/shared-types",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared TypeScript types for GlassBox",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

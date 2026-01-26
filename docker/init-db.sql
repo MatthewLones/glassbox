@@ -1,0 +1,12 @@
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "vector";
+
+-- Create schemas
+CREATE SCHEMA IF NOT EXISTS glassbox;
+
+-- Grant permissions
+GRANT ALL PRIVILEGES ON SCHEMA glassbox TO glassbox;
+ALTER DEFAULT PRIVILEGES IN SCHEMA glassbox GRANT ALL ON TABLES TO glassbox;
+ALTER DEFAULT PRIVILEGES IN SCHEMA glassbox GRANT ALL ON SEQUENCES TO glassbox;

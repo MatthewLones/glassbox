@@ -1,0 +1,28 @@
+{
+  "name": "glassbox",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Transparent collaborative workspace for human-agent workflows",
+  "scripts": {
+    "dev": "pnpm run --parallel dev",
+    "build": "pnpm run --recursive build",
+    "lint": "pnpm run --recursive lint",
+    "type-check": "pnpm run --recursive type-check",
+    "test": "pnpm run --recursive test",
+    "db:migrate": "pnpm --filter db-schema migrate",
+    "db:seed": "pnpm --filter db-schema seed",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "clean": "pnpm run --recursive clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "prettier": "^3.2.4",
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.14.0"
+}
