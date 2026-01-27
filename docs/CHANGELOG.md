@@ -9,6 +9,127 @@ This document logs all significant changes made during development. Each entry i
 
 ---
 
+## [2026-01-27] Complete Phase 2: Core API - Organizations & Users
+
+### Summary
+Implemented authentication, organization CRUD, and user endpoints with full database integration.
+
+### Justification
+Phase 2 provides the foundation for multi-tenant access control. Users can now authenticate with JWT tokens, manage organizations, and retrieve their profile.
+
+### Technical Details
+
+**Authentication:**
+- Dev-mode JWT generation endpoint (`POST /api/v1/auth/dev-token`)
+- JWT validation middleware extracts user context
+- Helper functions to get user ID as UUID from context
+
+**Organization Service (services.go):**
+- `ListByUser`: Returns orgs where user is a member
+- `GetByID`: Returns org if user has access
+- `Create`: Creates org + adds creator as owner in transaction
+- `Update`: Updates org (requires admin/owner role)
+- `Delete`: Deletes org (requires owner role)
+- `GetUserRole`: Gets user's role in an org
+
+**User Service (services.go):**
+- `GetByID`: Returns user by ID
+- `Update`: Updates user profile/settings
+- `ListNotifications`: Returns user's notifications
+- `MarkNotificationRead`: Marks notification as read
+
+**Organization Handlers (handlers.go):**
+- Full CRUD with proper error handling (404, 403)
+- UUID parsing from route params
+- JSON request binding
+
+**User Handlers (handlers.go):**
+- GetMe, UpdateMe, ListNotifications, MarkNotificationRead
+- Query param support (unread=true filter)
+
+### Files Modified
+- `apps/api/internal/services/services.go` - Added AuthService, OrganizationService, UserService methods
+- `apps/api/internal/handlers/handlers.go` - Implemented org and user handlers
+- `apps/api/cmd/api/main.go` - Added dev-token route
+- `docs/ROADMAP.md` - Marked Phase 2 complete
+
+### Verification
+All endpoints tested with curl:
+- Health check: `GET /health` ✓
+- Generate token: `POST /api/v1/auth/dev-token` ✓
+- List orgs: `GET /api/v1/orgs` ✓
+- Create org: `POST /api/v1/orgs` ✓
+- Get org: `GET /api/v1/orgs/:orgId` ✓
+- Update org: `PATCH /api/v1/orgs/:orgId` ✓
+- Delete org: `DELETE /api/v1/orgs/:orgId` ✓
+- Get user: `GET /api/v1/users/me` ✓
+
+---
+
+## [2026-01-27] Complete Phase 1: Foundation
+
+### Summary
+Verified all local development infrastructure works correctly and created seed data.
+
+### Justification
+Phase 1 establishes the foundation for all subsequent development. Without working database, cache, and queue connections, no other work can proceed.
+
+### Technical Details
+
+**Docker Containers:**
+- PostgreSQL 16 with pgvector extension running on :5432
+- Redis 7 running on :6379
+- LocalStack running on :4566 (S3, SQS)
+
+**Database:**
+- All 16 tables created via migration
+- Extensions installed: uuid-ossp, pgcrypto, pgvector
+- Created seed data script with test org, users, project, nodes
+
+**Seed Data Created:**
+- 1 organization (Acme Corp)
+- 2 users (Alice, Bob)
+- 1 project (Q1 Planning)
+- 4 nodes (hierarchical structure with parent-child)
+- Sample inputs, outputs, versions, dependencies
+- 1 running agent execution with trace events
+- 2 templates (system + org-specific)
+
+**LocalStack Resources:**
+- S3 bucket: `glassbox-files-dev`
+- SQS queues: agent-jobs, file-processing, notifications + DLQs
+
+**Bug Fixes:**
+- Fixed pgx transaction type mismatch (pgx.Tx vs pgxpool.Tx)
+- Fixed seed script column name (trace → trace_summary)
+
+### Files Modified
+- `packages/db-schema/seeds/001_dev_seed.sql` - New seed data script
+- `apps/api/internal/database/postgres.go` - Fixed transaction type
+- `docs/ROADMAP.md` - Marked Phase 1 complete
+
+---
+
+## [2026-01-26] Create Master Roadmap
+
+### Summary
+Created comprehensive backend development roadmap with 10 phases and 100+ tasks.
+
+### Justification
+Need a formal, persistent todo list to track all backend development work. This lives in the repo and can be checked off as work is completed.
+
+### Technical Details
+- 10 development phases from Foundation to Testing
+- Each phase has specific tasks with checkboxes
+- Includes verification criteria for each phase
+- Quick reference section for common commands and file locations
+- Progress tracking instructions
+
+### Files Modified
+- `docs/ROADMAP.md` - New master roadmap created
+
+---
+
 ## [2026-01-26] Add Frontend Context Document
 
 ### Summary

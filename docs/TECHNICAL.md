@@ -565,9 +565,12 @@ Base URL: /api/v1
 
 Authentication:
   All endpoints require Authorization: Bearer <token>
-  Token is Cognito JWT, validated server-side
+  Token is Cognito JWT in production, dev JWT for local development
 
-Organizations:
+  Dev-only endpoints:
+  POST   /auth/dev-token               Generate JWT for local development ✅
+
+Organizations: ✅ IMPLEMENTED
   GET    /orgs                          List user's organizations
   POST   /orgs                          Create organization
   GET    /orgs/:orgId                   Get organization details
@@ -631,7 +634,7 @@ Templates:
   GET    /templates/:templateId         Get template
   POST   /templates/:templateId/apply   Apply template to create nodes
 
-Users:
+Users: ✅ IMPLEMENTED
   GET    /users/me                      Get current user
   PATCH  /users/me                      Update current user
   GET    /users/me/notifications        Get notifications
@@ -1720,17 +1723,48 @@ Retention:
 
 ---
 
+## Implementation Status
+
+### Completed
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Repository structure | ✅ Complete | pnpm monorepo with apps/, packages/ |
+| Database schema | ✅ Complete | 16 tables, pgvector, RLS ready |
+| Docker local dev | ✅ Complete | Postgres, Redis, LocalStack |
+| Go API skeleton | ✅ Complete | All routes defined in Gin |
+| Auth (dev mode) | ✅ Complete | JWT generation + validation middleware |
+| Organization endpoints | ✅ Complete | Full CRUD with role-based access |
+| User endpoints | ✅ Complete | Profile + notifications |
+| Python agent worker | 🔶 Partial | LangGraph structure, needs SQS integration |
+
+### In Progress (Phase 3)
+
+- Project handlers (CRUD)
+- Node handlers (CRUD + versioning + locking)
+- Node inputs/outputs handlers
+
+### Not Started
+
+- File handling (S3 presigned URLs)
+- Agent execution endpoints
+- WebSocket service
+- Search/RAG endpoints
+- AWS CDK infrastructure
+
 ## Next Steps
 
-1. **Set up repository structure** - Initialize monorepo with pnpm workspaces
-2. **Create database schema** - PostgreSQL migrations with pgvector
-3. **Build Go API skeleton** - Basic CRUD endpoints
-4. **Build Next.js frontend** - Auth + basic node views
-5. **Implement file upload** - S3 presigned URLs
-6. **Build Python agent worker** - LangGraph + LiteLLM integration
-7. **Deploy to staging** - AWS CDK infrastructure
-8. **Iterate on MVP** - User feedback loop
+1. ~~Set up repository structure~~ ✅
+2. ~~Create database schema~~ ✅
+3. ~~Build Go API skeleton~~ ✅
+4. **Implement Project & Node APIs** ← Current focus
+5. Implement file upload with S3
+6. Wire up Python agent worker with SQS
+7. Build Next.js frontend
+8. Deploy to staging with AWS CDK
 
 ---
 
 *This document will be updated as architectural decisions evolve and new requirements emerge.*
+
+**Last Updated:** 2026-01-27

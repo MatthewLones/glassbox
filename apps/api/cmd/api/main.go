@@ -128,6 +128,10 @@ func setupRouter(cfg *config.Config, h *handlers.Handlers, logger *zap.Logger) *
 		// Auth routes
 		auth := v1.Group("/auth")
 		{
+			// Dev token endpoint (no auth required - for local development only)
+			if cfg.IsDevelopment() {
+				auth.POST("/dev-token", h.Auth.GenerateDevToken)
+			}
 			auth.POST("/ws-token", middleware.Auth(cfg), h.Auth.GetWSToken)
 		}
 

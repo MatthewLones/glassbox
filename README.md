@@ -78,6 +78,8 @@ glassbox/
 
 - [Product Requirements (PRD)](docs/PRD.md) - What we're building and why
 - [Technical Implementation](docs/TECHNICAL.md) - Architecture, tech stack, and implementation details
+- [Development Roadmap](docs/ROADMAP.md) - Master todo list for backend development
+- [Changelog](docs/CHANGELOG.md) - Log of all significant changes
 
 ## Tech Stack
 
