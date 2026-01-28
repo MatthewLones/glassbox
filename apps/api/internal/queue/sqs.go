@@ -118,8 +118,25 @@ type AgentJob struct {
 }
 
 // DispatchAgentJob sends an agent job to the queue
-func (s *SQSClient) DispatchAgentJob(ctx context.Context, job AgentJob) error {
-	body, err := json.Marshal(job)
+// Accepts any struct that marshals to the expected format (for interface compatibility)
+func (s *SQSClient) DispatchAgentJob(ctx context.Context, job any) error {
+	// Convert to our internal type if needed
+	var agentJob AgentJob
+	switch v := job.(type) {
+	case AgentJob:
+		agentJob = v
+	default:
+		// Marshal and unmarshal to convert from services.AgentJobMessage
+		data, err := json.Marshal(job)
+		if err != nil {
+			return fmt.Errorf("failed to marshal job: %w", err)
+		}
+		if err := json.Unmarshal(data, &agentJob); err != nil {
+			return fmt.Errorf("failed to unmarshal job: %w", err)
+		}
+	}
+
+	body, err := json.Marshal(agentJob)
 	if err != nil {
 		return fmt.Errorf("failed to marshal job: %w", err)
 	}
@@ -139,8 +156,8 @@ func (s *SQSClient) DispatchAgentJob(ctx context.Context, job AgentJob) error {
 	}
 
 	s.logger.Info("Dispatched agent job",
-		zap.String("executionId", job.ExecutionID.String()),
-		zap.String("nodeId", job.NodeID.String()),
+		zap.String("executionId", agentJob.ExecutionID.String()),
+		zap.String("nodeId", agentJob.NodeID.String()),
 	)
 
 	return nil

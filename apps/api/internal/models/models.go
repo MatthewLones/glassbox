@@ -316,3 +316,46 @@ type Notification struct {
 	ReadAt       *time.Time `json:"readAt,omitempty" db:"read_at"`
 	CreatedAt    time.Time  `json:"createdAt" db:"created_at"`
 }
+
+// =====================================================
+// SEARCH & RAG CONTEXT
+// =====================================================
+
+// NodeSummary is a lightweight representation of a node for search results
+type NodeSummary struct {
+	ID          UUID    `json:"id"`
+	Title       string  `json:"title"`
+	Description *string `json:"description,omitempty"`
+	Status      string  `json:"status"`
+	AuthorType  string  `json:"authorType"`
+}
+
+// ContextInput represents input content for RAG context
+type ContextInput struct {
+	ID            UUID    `json:"id"`
+	Type          string  `json:"type"`
+	Label         *string `json:"label,omitempty"`
+	TextContent   *string `json:"textContent,omitempty"`
+	Filename      *string `json:"filename,omitempty"`
+	ExtractedText *string `json:"extractedText,omitempty"`
+}
+
+// ContextOutput represents output content for RAG context
+type ContextOutput struct {
+	ID             UUID           `json:"id"`
+	Type           string         `json:"type"`
+	Label          *string        `json:"label,omitempty"`
+	TextContent    *string        `json:"textContent,omitempty"`
+	StructuredData map[string]any `json:"structuredData,omitempty"`
+	Filename       *string        `json:"filename,omitempty"`
+	ExtractedText  *string        `json:"extractedText,omitempty"`
+}
+
+// NodeContext contains full context for a node, used for RAG
+type NodeContext struct {
+	Node        NodeSummary     `json:"node"`
+	Inputs      []ContextInput  `json:"inputs"`
+	Outputs     []ContextOutput `json:"outputs"`
+	ParentChain []NodeSummary   `json:"parentChain"`
+	Siblings    []NodeSummary   `json:"siblings"`
+}

@@ -9,6 +9,199 @@ This document logs all significant changes made during development. Each entry i
 
 ---
 
+## [2026-01-28] Phase 6 & 7: File Processing & Search API
+
+### Summary
+Implemented file processing worker with text extraction (PDF, DOCX, plain text) and complete Search API with text search, semantic search foundation, and node context for RAG.
+
+### Justification
+Phase 6 enables extracting searchable content from uploaded files, which is essential for RAG. Phase 7 provides the search infrastructure to find relevant nodes and files based on user queries, enabling intelligent retrieval for the agent system.
+
+### Technical Details
+
+**File Processing Worker (`apps/workers/file_processor/worker.py`):**
+- Text extraction for PDF files using pypdf
+- Text extraction for DOCX files using python-docx
+- Plain text file handling
+- S3 download integration for processing
+- Embedding generation with LiteLLM (requires OpenAI key)
+- pgvector storage format for embeddings
+
+**Search Service (`apps/api/internal/services/search.go`):**
+- `TextSearch`: ILIKE-based search on node titles, descriptions, and file content
+- `SemanticSearch`: pgvector cosine similarity search with threshold filtering
+- `GetNodeContext`: Returns full context for a node including:
+  - Node summary (id, title, description, status, author)
+  - Inputs with file content
+  - Outputs with structured data and files
+  - Parent chain for hierarchical context
+  - Sibling nodes for related context
+
+**Search Handlers (`apps/api/internal/handlers/handlers.go`):**
+- `POST /api/v1/orgs/:orgId/search` - Text search across nodes and files
+- `POST /api/v1/orgs/:orgId/search/semantic` - Semantic search (returns 503 until embedding provider configured)
+- `GET /api/v1/nodes/:nodeId/context` - Get node context for RAG
+
+**New Models (`apps/api/internal/models/models.go`):**
+- `NodeSummary` - Lightweight node representation
+- `ContextInput` - Input content for RAG context
+- `ContextOutput` - Output content for RAG context
+- `NodeContext` - Complete context bundle for RAG
+
+### Files Modified
+- `apps/workers/file_processor/worker.py` - Complete text extraction implementation
+- `apps/workers/requirements.txt` - Added pypdf, python-docx, aiofiles
+- `apps/api/internal/services/search.go` - New SearchService implementation
+- `apps/api/internal/services/services.go` - Removed unused import
+- `apps/api/internal/handlers/handlers.go` - Implemented search handlers
+- `apps/api/internal/models/models.go` - Added RAG context models
+- `apps/api/cmd/api/main.go` - Added node context route
+- `docs/ROADMAP.md` - Marked Phase 6 & 7 complete
+- `docs/CHANGELOG.md` - Added this entry
+
+### API Endpoints Implemented
+- `POST /api/v1/orgs/:orgId/search` - Text search nodes and files
+- `POST /api/v1/orgs/:orgId/search/semantic` - Semantic search
+- `GET /api/v1/nodes/:nodeId/context` - Get node context for RAG
+
+### Verification
+Text search tested successfully:
+- Search for "Market" returns 2 nodes (Marketing Materials Development, Market Research)
+- Search for "analysis" returns 9 results (nodes + files)
+- Filters working (status, project, author)
+- Pagination working (limit, offset)
+
+Node context tested:
+- Returns node summary with inputs, outputs, parent chain, siblings
+- File references properly included
+
+---
+
+## [2026-01-28] Phase 5 S3-First Outputs & End-to-End Testing
+
+### Summary
+Added S3-first storage for all agent outputs and completed successful end-to-end execution test with Claude Sonnet 4.
+
+### Justification
+All agent outputs (text, structured data, files) must be stored in S3 for auditability, compliance, and preventing database bloat. Tested full execution flow to verify all Phase 5 functionality works together.
+
+### Technical Details
+
+**S3 Client Module (`shared/s3.py`):**
+- Async S3 client using aioboto3
+- `upload()`, `download()`, `download_json()`, `get_presigned_url()`, `delete()`, `exists()`
+- Helper functions: `generate_output_key()`, `generate_file_key()`
+- Standardized S3 key format: `outputs/{org_id}/{execution_id}/{timestamp}_{type}_{uuid}.{ext}`
+
+**Agent Executor S3 Integration:**
+- All outputs now uploaded to S3 before creating database records
+- Creates `files` record with storage_key pointing to S3
+- Links `node_outputs` to files via file_id foreign key
+- Full metadata tracking (execution_id, node_id, output_type, label)
+
+**Database Connection Fix:**
+- Added `search_path` initialization to include `glassbox` schema
+- Fixed SQL type inference issue in `_update_status` method
+
+**End-to-End Test Results (Claude claude-sonnet-4-20250514):**
+- Duration: 46.4 seconds
+- Tokens: 13,683 in / 2,422 out (7 LLM iterations)
+- Created 4 subnodes (task decomposition working)
+- Generated 2 structured outputs stored in S3 (~4.8KB total)
+- 22 trace events logged with full audit trail
+- Execution completed successfully with all evidence tracked
+
+### Files Modified
+- `apps/workers/shared/s3.py` - New S3 client module
+- `apps/workers/shared/__init__.py` - Export S3 client
+- `apps/workers/shared/db.py` - Added search_path init
+- `apps/workers/shared/config.py` - Changed default model to anthropic/claude-sonnet-4-20250514
+- `apps/workers/agent/executor.py` - S3 output storage, fixed _update_status, added user message for Anthropic
+- `apps/workers/agent/worker.py` - Pass org_id to executor
+- `apps/workers/requirements.txt` - New Python dependencies file
+- `apps/workers/test_full_execution.py` - Comprehensive test script
+
+---
+
+## [2026-01-28] Complete Phase 5: Agent Execution
+
+### Summary
+Implemented complete agent execution system with pause/resume, cancellation, human-in-the-loop (HITL), and state checkpointing.
+
+### Justification
+Phase 5 is the core feature of GlassBox - the ability to run AI agents on nodes. This enables users to start agent executions, pause/resume them, provide human input when requested, and track the full execution trace.
+
+### Technical Details
+
+**ExecutionService (`services/execution.go`):**
+- `Start`: Creates execution record, dispatches SQS job to agent worker
+- `GetByID`: Returns execution with HITL fields extracted from checkpoint
+- `GetCurrentForNode`: Returns active execution for a node
+- `Pause`: Sets status to 'paused', worker checkpoints on next iteration
+- `Resume`: Sets status to 'running', re-dispatches SQS job
+- `Cancel`: Sets status to 'cancelled'
+- `ProvideInput`: Stores human input in checkpoint, resumes execution
+- `GetTrace`: Returns all trace events for an execution
+
+**ExecutionHandler (`handlers/handlers.go`):**
+- All 8 endpoints implemented with proper error handling
+- New HITL endpoint: `POST /executions/:executionId/input`
+- Returns execution with humanInputRequest when awaiting input
+
+**Python Worker (`workers/agent/executor.py`):**
+- Status polling before each iteration (checks for pause/cancel)
+- Checkpointing after each iteration for crash recovery
+- HITL support with `awaiting_input` status
+- Resume from checkpoint on re-dispatch
+- Human input injected into conversation as user message
+
+**State Machine:**
+```
+pending → running → complete
+              ↓
+           paused → running (resume)
+              ↓
+         cancelled
+
+running → awaiting_input → running (after input provided)
+```
+
+### Files Modified
+- `apps/api/internal/services/execution.go` - New ExecutionServiceFull implementation
+- `apps/api/internal/services/services.go` - Updated Services struct and SQS interface
+- `apps/api/internal/handlers/handlers.go` - Implemented execution handlers
+- `apps/api/internal/queue/sqs.go` - Updated DispatchAgentJob to accept any
+- `apps/api/cmd/api/main.go` - Added HITL input route
+- `apps/workers/agent/executor.py` - Added status polling, checkpointing, HITL
+- `apps/workers/agent/worker.py` - Fixed camelCase field handling
+- `docs/ROADMAP.md` - Marked Phase 5 complete
+- `docs/CHANGELOG.md` - Added this entry
+
+### API Endpoints Implemented
+**Node Execution Control:**
+- `POST /api/v1/nodes/:nodeId/execute` - Start execution
+- `GET /api/v1/nodes/:nodeId/execution` - Get current execution
+- `POST /api/v1/nodes/:nodeId/execution/pause` - Pause execution
+- `POST /api/v1/nodes/:nodeId/execution/resume` - Resume execution
+- `POST /api/v1/nodes/:nodeId/execution/cancel` - Cancel execution
+
+**Execution Details:**
+- `GET /api/v1/executions/:executionId` - Get execution by ID
+- `GET /api/v1/executions/:executionId/trace` - Get full trace events
+- `POST /api/v1/executions/:executionId/input` - Provide human input (HITL)
+
+### Verification
+Integration test flow:
+1. Start execution → Status = 'pending', job dispatched to SQS
+2. Worker picks up job → Status = 'running', trace events logged
+3. Request pause → Status = 'paused', checkpoint saved
+4. Resume → Status = 'running', worker continues from checkpoint
+5. Cancel → Status = 'cancelled', worker exits cleanly
+6. HITL: Agent requests input → Status = 'awaiting_input'
+7. Provide input via API → Status = 'running', input added to conversation
+
+---
+
 ## [2026-01-27] Complete Phase 4: File Handling
 
 ### Summary

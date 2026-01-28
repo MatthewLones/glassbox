@@ -29,7 +29,7 @@ type Services struct {
 	Projects   *ProjectService
 	Nodes      *NodeService
 	Files      *FileService
-	Executions *ExecutionService
+	Executions *ExecutionServiceFull
 	Templates  *TemplateService
 	Users      *UserService
 	Search     *SearchService
@@ -43,7 +43,7 @@ func NewServices(db *database.DB, redis *database.Redis, s3 S3Client, sqs SQSCli
 		Projects:   NewProjectService(db, logger),
 		Nodes:      NewNodeService(db, redis, logger),
 		Files:      NewFileService(db, s3, sqs, cfg, logger),
-		Executions: NewExecutionService(db, redis, cfg, logger),
+		Executions: NewExecutionServiceFull(db, redis, sqs, cfg, logger),
 		Templates:  NewTemplateService(db, logger),
 		Users:      NewUserService(db, logger),
 		Search:     NewSearchService(db, logger),
@@ -1549,6 +1549,7 @@ type S3Client interface {
 // SQSClient interface for SQS operations (allows mocking in tests)
 type SQSClient interface {
 	DispatchFileProcessingJob(ctx context.Context, job any) error
+	DispatchAgentJob(ctx context.Context, job any) error
 }
 
 // FileProcessingJobMessage is the message sent to the file processing queue
@@ -1782,18 +1783,6 @@ func (s *FileService) userHasOrgAccess(ctx context.Context, userID, orgID uuid.U
 		return false, fmt.Errorf("failed to check org access: %w", err)
 	}
 	return exists, nil
-}
-
-// ExecutionService handles agent execution operations
-type ExecutionService struct {
-	db     *database.DB
-	redis  *database.Redis
-	cfg    *config.Config
-	logger *zap.Logger
-}
-
-func NewExecutionService(db *database.DB, redis *database.Redis, cfg *config.Config, logger *zap.Logger) *ExecutionService {
-	return &ExecutionService{db: db, redis: redis, cfg: cfg, logger: logger}
 }
 
 // TemplateService handles template operations

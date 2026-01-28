@@ -213,6 +213,9 @@ func setupRouter(cfg *config.Config, h *handlers.Handlers, logger *zap.Logger) *
 				nodes.POST("/:nodeId/lock", h.Nodes.AcquireLock)
 				nodes.DELETE("/:nodeId/lock", h.Nodes.ReleaseLock)
 
+				// Node context (for RAG)
+				nodes.GET("/:nodeId/context", h.Search.GetNodeContext)
+
 				// Agent execution
 				nodes.POST("/:nodeId/execute", h.Executions.Start)
 				nodes.GET("/:nodeId/execution", h.Executions.GetCurrent)
@@ -226,6 +229,7 @@ func setupRouter(cfg *config.Config, h *handlers.Handlers, logger *zap.Logger) *
 			{
 				executions.GET("/:executionId", h.Executions.Get)
 				executions.GET("/:executionId/trace", h.Executions.GetTrace)
+				executions.POST("/:executionId/input", h.Executions.ProvideInput)
 			}
 
 			// Files

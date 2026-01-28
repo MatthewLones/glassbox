@@ -1066,21 +1066,268 @@ func (h *FileHandler) Delete(c *gin.Context) {
 // =====================================================
 
 type ExecutionHandler struct {
-	svc    *services.ExecutionService
+	svc    *services.ExecutionServiceFull
 	logger *zap.Logger
 }
 
-func NewExecutionHandler(svc *services.ExecutionService, logger *zap.Logger) *ExecutionHandler {
+func NewExecutionHandler(svc *services.ExecutionServiceFull, logger *zap.Logger) *ExecutionHandler {
 	return &ExecutionHandler{svc: svc, logger: logger}
 }
 
-func (h *ExecutionHandler) Start(c *gin.Context)      { c.JSON(http.StatusAccepted, gin.H{}) }
-func (h *ExecutionHandler) GetCurrent(c *gin.Context) { c.JSON(http.StatusOK, gin.H{}) }
-func (h *ExecutionHandler) Pause(c *gin.Context)      { c.JSON(http.StatusOK, gin.H{}) }
-func (h *ExecutionHandler) Resume(c *gin.Context)     { c.JSON(http.StatusOK, gin.H{}) }
-func (h *ExecutionHandler) Cancel(c *gin.Context)     { c.JSON(http.StatusOK, gin.H{}) }
-func (h *ExecutionHandler) Get(c *gin.Context)        { c.JSON(http.StatusOK, gin.H{}) }
-func (h *ExecutionHandler) GetTrace(c *gin.Context)   { c.JSON(http.StatusOK, gin.H{"data": []any{}}) }
+// Start starts a new agent execution for a node
+func (h *ExecutionHandler) Start(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	execution, err := h.svc.Start(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if errors.Is(err, services.ErrExecutionAlreadyActive) {
+		c.JSON(http.StatusConflict, gin.H{"error": "An execution is already running for this node"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to start execution", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start execution"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"execution": execution})
+}
+
+// GetCurrent returns the current active execution for a node
+func (h *ExecutionHandler) GetCurrent(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	execution, err := h.svc.GetCurrentForNode(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No active execution found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to get current execution", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get execution"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"execution": execution})
+}
+
+// Pause pauses a running execution
+func (h *ExecutionHandler) Pause(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	err = h.svc.Pause(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No active execution found"})
+		return
+	}
+	if errors.Is(err, services.ErrExecutionNotPausable) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Execution cannot be paused in its current state"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to pause execution", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to pause execution"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Execution pausing"})
+}
+
+// Resume resumes a paused execution
+func (h *ExecutionHandler) Resume(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	err = h.svc.Resume(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No paused execution found"})
+		return
+	}
+	if errors.Is(err, services.ErrExecutionNotResumable) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Execution cannot be resumed in its current state"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to resume execution", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to resume execution"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Execution resumed"})
+}
+
+// Cancel cancels an active execution
+func (h *ExecutionHandler) Cancel(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	err = h.svc.Cancel(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No active execution found"})
+		return
+	}
+	if errors.Is(err, services.ErrExecutionNotCancellable) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Execution cannot be cancelled in its current state"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to cancel execution", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel execution"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Execution cancelled"})
+}
+
+// Get returns an execution by ID
+func (h *ExecutionHandler) Get(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	executionID, err := uuid.Parse(c.Param("executionId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid execution ID"})
+		return
+	}
+
+	execution, err := h.svc.GetByIDWithHumanInput(c.Request.Context(), executionID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Execution not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to get execution", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get execution"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"execution": execution})
+}
+
+// GetTrace returns the full trace for an execution
+func (h *ExecutionHandler) GetTrace(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	executionID, err := uuid.Parse(c.Param("executionId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid execution ID"})
+		return
+	}
+
+	events, err := h.svc.GetTrace(c.Request.Context(), executionID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Execution not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to get trace", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get trace"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"events": events})
+}
+
+// ProvideInputRequest for human input
+type ProvideInputRequest struct {
+	Input map[string]any `json:"input" binding:"required"`
+}
+
+// ProvideInput provides human input to an execution awaiting input
+func (h *ExecutionHandler) ProvideInput(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	executionID, err := uuid.Parse(c.Param("executionId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid execution ID"})
+		return
+	}
+
+	var req ProvideInputRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	err = h.svc.ProvideInput(c.Request.Context(), executionID, userID, req.Input)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Execution not found"})
+		return
+	}
+	if errors.Is(err, services.ErrExecutionNotAwaitingInput) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Execution is not awaiting input"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to provide input", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to provide input"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Input received, execution resuming"})
+}
 
 // =====================================================
 // TEMPLATE HANDLER
@@ -1219,8 +1466,107 @@ func NewSearchHandler(svc *services.SearchService, logger *zap.Logger) *SearchHa
 	return &SearchHandler{svc: svc, logger: logger}
 }
 
-func (h *SearchHandler) Search(c *gin.Context)         { c.JSON(http.StatusOK, gin.H{"data": []any{}}) }
-func (h *SearchHandler) SemanticSearch(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"data": []any{}}) }
+// Search performs text search across nodes and files
+func (h *SearchHandler) Search(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	orgID, err := uuid.Parse(c.Param("orgId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
+		return
+	}
+
+	var req services.SearchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	resp, err := h.svc.TextSearch(c.Request.Context(), orgID, userID, req)
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to perform text search", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to perform search"})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+// SemanticSearchRequest for the API - includes query for embedding generation
+type SemanticSearchAPIRequest struct {
+	Query       string     `json:"query" binding:"required"`
+	ProjectID   *uuid.UUID `json:"projectId,omitempty"`
+	Limit       int        `json:"limit,omitempty"`
+	Threshold   *float64   `json:"threshold,omitempty"`
+	IncludeText bool       `json:"includeText,omitempty"`
+}
+
+// SemanticSearch performs vector similarity search
+func (h *SearchHandler) SemanticSearch(c *gin.Context) {
+	_, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	_, err = uuid.Parse(c.Param("orgId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
+		return
+	}
+
+	var req SemanticSearchAPIRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// For semantic search, the embedding needs to be generated from the query
+	// This would typically be done via an embedding service
+	// For now, return an error indicating embeddings are not yet configured
+	// In production, you'd call an embedding API (OpenAI, Voyage, etc.)
+	c.JSON(http.StatusServiceUnavailable, gin.H{
+		"error":   "Semantic search requires embedding generation",
+		"message": "Configure OPENAI_API_KEY or another embedding provider to use semantic search",
+		"query":   req.Query,
+	})
+}
+
+// GetNodeContext returns context information for a node (for RAG)
+func (h *SearchHandler) GetNodeContext(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	ctx, err := h.svc.GetNodeContext(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to get node context", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get node context"})
+		return
+	}
+
+	c.JSON(http.StatusOK, ctx)
+}
 
 // =====================================================
 // HELPER FUNCTIONS

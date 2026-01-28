@@ -18,24 +18,36 @@ logger = structlog.get_logger()
 
 
 async def handle_agent_job(message: dict[str, Any]) -> None:
-    """Handle an agent execution job."""
-    node_id = message.get("node_id")
-    execution_id = message.get("execution_id")
-    org_config = message.get("org_config", {})
+    """Handle an agent execution job.
+
+    Message format from Go API (camelCase):
+    {
+        "executionId": "uuid",
+        "nodeId": "uuid",
+        "orgId": "uuid",
+        "orgConfig": {...}
+    }
+    """
+    # Support both camelCase (from Go API) and snake_case (legacy)
+    node_id = message.get("nodeId") or message.get("node_id")
+    execution_id = message.get("executionId") or message.get("execution_id")
+    org_id = message.get("orgId") or message.get("org_id")
+    org_config = message.get("orgConfig") or message.get("org_config", {})
 
     if not node_id or not execution_id:
-        logger.error("Invalid message: missing node_id or execution_id")
+        logger.error("Invalid message: missing nodeId or executionId", message=message)
         return
 
     logger.info(
         "Processing agent job",
         node_id=node_id,
         execution_id=execution_id,
+        org_id=org_id,
     )
 
     try:
         db = await get_db()
-        executor = AgentExecutor(db, node_id, execution_id, org_config)
+        executor = AgentExecutor(db, node_id, execution_id, org_config, org_id=org_id)
         await executor.run()
 
         logger.info(

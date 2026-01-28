@@ -33,8 +33,8 @@ class Settings(BaseSettings):
     sqs_agent_queue_url: str = "http://localhost:4566/000000000000/glassbox-agent-jobs-dev"
     sqs_file_queue_url: str = "http://localhost:4566/000000000000/glassbox-file-processing-dev"
 
-    # LLM defaults
-    default_model: str = "gpt-4-turbo-preview"
+    # LLM defaults (LiteLLM format - prefix with provider/)
+    default_model: str = "anthropic/claude-sonnet-4-20250514"
     openai_api_key: Optional[str] = None
     anthropic_api_key: Optional[str] = None
 

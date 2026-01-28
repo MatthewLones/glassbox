@@ -20,11 +20,16 @@ class Database:
     async def connect(self) -> None:
         """Initialize the connection pool."""
         if self._pool is None:
+            async def init_connection(conn):
+                # Set search_path to include glassbox schema
+                await conn.execute("SET search_path TO glassbox, public")
+
             self._pool = await asyncpg.create_pool(
                 self._settings.database_url,
                 min_size=5,
                 max_size=20,
                 command_timeout=60,
+                init=init_connection,
             )
 
     async def disconnect(self) -> None:
