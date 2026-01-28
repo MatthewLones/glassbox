@@ -577,14 +577,14 @@ Organizations: ✅ IMPLEMENTED
   PATCH  /orgs/:orgId                   Update organization
   DELETE /orgs/:orgId                   Delete organization
 
-Projects:
+Projects: ✅ IMPLEMENTED
   GET    /orgs/:orgId/projects          List projects
   POST   /orgs/:orgId/projects          Create project
   GET    /projects/:projectId           Get project
   PATCH  /projects/:projectId           Update project
   DELETE /projects/:projectId           Delete project
 
-Nodes:
+Nodes: ✅ IMPLEMENTED
   GET    /projects/:projectId/nodes     List nodes (with filters)
   POST   /projects/:projectId/nodes     Create node
   GET    /nodes/:nodeId                 Get node with inputs/outputs
@@ -1736,17 +1736,20 @@ Retention:
 | Auth (dev mode) | ✅ Complete | JWT generation + validation middleware |
 | Organization endpoints | ✅ Complete | Full CRUD with role-based access |
 | User endpoints | ✅ Complete | Profile + notifications |
+| Project endpoints | ✅ Complete | Full CRUD under organizations |
+| Node endpoints | ✅ Complete | Full CRUD with inputs/outputs |
+| Node versioning | ✅ Complete | Auto-version on update, rollback support |
+| Node relationships | ✅ Complete | Children + dependencies queries |
+| Node locking | ✅ Complete | Redis + DB distributed locks |
 | Python agent worker | 🔶 Partial | LangGraph structure, needs SQS integration |
 
-### In Progress (Phase 3)
+### In Progress (Phase 4)
 
-- Project handlers (CRUD)
-- Node handlers (CRUD + versioning + locking)
-- Node inputs/outputs handlers
+- File handling (S3 presigned URLs)
+- SQS job dispatch
 
 ### Not Started
 
-- File handling (S3 presigned URLs)
 - Agent execution endpoints
 - WebSocket service
 - Search/RAG endpoints
@@ -1757,8 +1760,8 @@ Retention:
 1. ~~Set up repository structure~~ ✅
 2. ~~Create database schema~~ ✅
 3. ~~Build Go API skeleton~~ ✅
-4. **Implement Project & Node APIs** ← Current focus
-5. Implement file upload with S3
+4. ~~Implement Project & Node APIs~~ ✅
+5. **Implement file upload with S3** ← Current focus
 6. Wire up Python agent worker with SQS
 7. Build Next.js frontend
 8. Deploy to staging with AWS CDK

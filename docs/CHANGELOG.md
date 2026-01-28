@@ -9,6 +9,165 @@ This document logs all significant changes made during development. Each entry i
 
 ---
 
+## [2026-01-27] Complete Phase 4: File Handling
+
+### Summary
+Implemented complete file upload/download flow with S3 presigned URLs, file metadata tracking, and SQS job dispatch for file processing.
+
+### Justification
+Phase 4 enables file attachments for nodes. Users can upload documents (PDFs, DOCXs, images) that will be processed for text extraction and embeddings in later phases.
+
+### Technical Details
+
+**S3 Client (`internal/storage/s3.go`):**
+- AWS SDK v2 integration with LocalStack support for development
+- `PresignedUploadURL`: Generates presigned PUT URLs with content-type (15 min expiration)
+- `PresignedDownloadURL`: Generates presigned GET URLs (1 hour expiration)
+- `HeadObject`: Verifies file existence and returns size
+- `DeleteObject`: Removes file from S3
+
+**SQS Client (`internal/queue/sqs.go`):**
+- AWS SDK v2 integration with LocalStack support
+- `DispatchFileProcessingJob`: Sends job to file processing queue
+- `DispatchAgentJob`: Sends job to agent execution queue (for Phase 5)
+- Message attributes for job type routing
+
+**FileService (`services.go`):**
+- `GetUploadURL`: Creates file record (pending status) and returns presigned URL
+- `ConfirmUpload`: Verifies S3 upload, updates status, dispatches processing job
+- `GetByID`: Returns file metadata with download URL
+- `Delete`: Removes from both S3 and database
+- Org membership validation for access control
+
+**File Handlers (`handlers.go`):**
+- `POST /api/v1/orgs/:orgId/files/upload` - Returns fileId and presigned upload URL
+- `POST /api/v1/files/:fileId/confirm` - Confirms upload and triggers processing
+- `GET /api/v1/files/:fileId` - Returns metadata with download URL
+- `DELETE /api/v1/files/:fileId` - Deletes file
+
+### Files Modified
+- `apps/api/internal/storage/s3.go` - New S3 client wrapper
+- `apps/api/internal/queue/sqs.go` - New SQS client wrapper
+- `apps/api/internal/services/services.go` - Added FileService methods
+- `apps/api/internal/handlers/handlers.go` - Implemented file handlers
+- `apps/api/cmd/api/main.go` - Initialize S3 and SQS clients
+- `apps/api/go.mod` - Added AWS SDK v2 dependencies
+- `docs/ROADMAP.md` - Marked Phase 4 complete
+- `docs/CHANGELOG.md` - Added this entry
+
+### API Endpoints Implemented
+**Files:**
+- `POST /api/v1/orgs/:orgId/files/upload` - Get presigned upload URL
+- `POST /api/v1/files/:fileId/confirm` - Confirm upload complete
+- `GET /api/v1/files/:fileId` - Get file metadata + download URL
+- `DELETE /api/v1/files/:fileId` - Delete file
+
+### Verification
+Tested complete flow with curl:
+1. Request upload URL → Returns fileId and presigned S3 URL ✓
+2. Upload file to S3 → File stored in LocalStack S3 ✓
+3. Confirm upload → Status changes to "uploaded", size populated ✓
+4. Get file → Returns metadata with download URL ✓
+5. Delete file → HTTP 204, file removed from S3 and DB ✓
+6. Verify SQS → Job message dispatched to file-processing queue ✓
+
+---
+
+## [2026-01-27] Complete Phase 3: Core API - Projects & Nodes
+
+### Summary
+Implemented full CRUD for Projects and Nodes, including inputs/outputs, versioning, relationships, and distributed locking.
+
+### Justification
+Phase 3 delivers the core data primitives of GlassBox. Nodes are the fundamental unit of work, and this phase enables creating, editing, versioning, and organizing them with proper access control.
+
+### Technical Details
+
+**Project Service (services.go):**
+- `ListByOrg`: Returns all projects in an org (with membership check)
+- `GetByID`: Returns project if user has org access
+- `Create`: Creates project with default workflow states
+- `Update`: Updates project name, description, settings, workflow states
+- `Delete`: Requires admin/owner role, cascades to nodes
+
+**Node Service (services.go):**
+- `ListByProject`: Returns nodes with optional filters (status, authorType, parentId)
+- `GetByID`: Returns node with populated inputs and outputs
+- `Create`: Creates node with position, metadata, author tracking
+- `Update`: Updates node and auto-creates version snapshot in transaction
+- `Delete`: Soft-delete (sets deleted_at)
+
+**Node Inputs/Outputs:**
+- `AddInput`: Add file, node reference, URL, or text input
+- `RemoveInput`: Remove input by ID
+- `AddOutput`: Add file, structured data, text, or URL output
+- `RemoveOutput`: Remove output by ID
+- Auto-incrementing sort_order for ordering
+
+**Node Versioning:**
+- `ListVersions`: Get version history for a node
+- `GetVersion`: Get specific version snapshot
+- `Rollback`: Restore node to previous version (creates rollback version first)
+- Auto-version on every update (stores full snapshot as JSONB)
+
+**Node Relationships:**
+- `ListChildren`: Get child nodes via parent_id
+- `ListDependencies`: Get nodes this node depends on via source_node_id in inputs
+
+**Node Locking (Redis + DB):**
+- `AcquireLock`: Distributed lock with Redis SETNX + DB persistence
+- `ReleaseLock`: Release lock from both Redis and DB
+- 5-minute lock expiration with automatic extension on re-acquire
+- Returns 409 Conflict when locked by another user
+
+**Handlers (handlers.go):**
+- All 17 node endpoints implemented with proper error handling
+- Query parameter binding for list filters
+- Version number parsing from URL params
+- Consistent error responses (400, 401, 403, 404, 409, 500)
+
+### Files Modified
+- `apps/api/internal/services/services.go` - Added ProjectService, NodeService with all methods
+- `apps/api/internal/handlers/handlers.go` - Implemented all project and node handlers
+- `docs/ROADMAP.md` - Marked Phase 3 complete
+- `docs/CHANGELOG.md` - Added this entry
+
+### API Endpoints Implemented
+**Projects:**
+- `GET /api/v1/orgs/:orgId/projects` - List projects
+- `POST /api/v1/orgs/:orgId/projects` - Create project
+- `GET /api/v1/projects/:projectId` - Get project
+- `PATCH /api/v1/projects/:projectId` - Update project
+- `DELETE /api/v1/projects/:projectId` - Delete project
+
+**Nodes:**
+- `GET /api/v1/projects/:projectId/nodes` - List nodes
+- `POST /api/v1/projects/:projectId/nodes` - Create node
+- `GET /api/v1/nodes/:nodeId` - Get node
+- `PATCH /api/v1/nodes/:nodeId` - Update node
+- `DELETE /api/v1/nodes/:nodeId` - Delete node
+
+**Node Inputs/Outputs:**
+- `POST /api/v1/nodes/:nodeId/inputs` - Add input
+- `DELETE /api/v1/nodes/:nodeId/inputs/:inputId` - Remove input
+- `POST /api/v1/nodes/:nodeId/outputs` - Add output
+- `DELETE /api/v1/nodes/:nodeId/outputs/:outputId` - Remove output
+
+**Node Versioning:**
+- `GET /api/v1/nodes/:nodeId/versions` - List versions
+- `GET /api/v1/nodes/:nodeId/versions/:version` - Get version
+- `POST /api/v1/nodes/:nodeId/rollback/:version` - Rollback
+
+**Node Relationships:**
+- `GET /api/v1/nodes/:nodeId/children` - List children
+- `GET /api/v1/nodes/:nodeId/dependencies` - List dependencies
+
+**Node Locking:**
+- `POST /api/v1/nodes/:nodeId/lock` - Acquire lock
+- `DELETE /api/v1/nodes/:nodeId/lock` - Release lock
+
+---
+
 ## [2026-01-27] Complete Phase 2: Core API - Organizations & Users
 
 ### Summary

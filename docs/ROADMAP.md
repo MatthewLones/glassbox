@@ -11,7 +11,7 @@ This is the master todo list for backend development. Check items off as they're
 | Area | Status | Notes |
 |------|--------|-------|
 | Database Schema | **Complete** | 16 tables, indexes, RLS ready |
-| Go API | **Phase 2 Complete** | Auth, Orgs, Users implemented |
+| Go API | **Phase 4 Complete** | Auth, Orgs, Users, Projects, Nodes, Files implemented |
 | Python Workers | Partial | Agent has LangGraph logic |
 | WebSocket | Not Started | Directory only |
 | Infrastructure | Not Started | Directory only |
@@ -64,84 +64,84 @@ This is the master todo list for backend development. Check items off as they're
 
 ---
 
-## Phase 3: Core API - Projects & Nodes
+## Phase 3: Core API - Projects & Nodes ✅ COMPLETE
 
 **Goal:** Full CRUD for the core Node primitive.
 
 ### 3.1 Project Handlers
-- [ ] `GET /api/v1/orgs/:orgId/projects` - List projects
-- [ ] `POST /api/v1/orgs/:orgId/projects` - Create project
-- [ ] `GET /api/v1/projects/:projectId` - Get project
-- [ ] `PATCH /api/v1/projects/:projectId` - Update project
-- [ ] `DELETE /api/v1/projects/:projectId` - Delete project
+- [x] `GET /api/v1/orgs/:orgId/projects` - List projects
+- [x] `POST /api/v1/orgs/:orgId/projects` - Create project
+- [x] `GET /api/v1/projects/:projectId` - Get project
+- [x] `PATCH /api/v1/projects/:projectId` - Update project
+- [x] `DELETE /api/v1/projects/:projectId` - Delete project
 
 ### 3.2 Node CRUD Handlers
-- [ ] `GET /api/v1/projects/:projectId/nodes` - List nodes (with filters)
-- [ ] `POST /api/v1/projects/:projectId/nodes` - Create node
-- [ ] `GET /api/v1/nodes/:nodeId` - Get node with inputs/outputs
-- [ ] `PATCH /api/v1/nodes/:nodeId` - Update node
-- [ ] `DELETE /api/v1/nodes/:nodeId` - Soft delete node
+- [x] `GET /api/v1/projects/:projectId/nodes` - List nodes (with filters)
+- [x] `POST /api/v1/projects/:projectId/nodes` - Create node
+- [x] `GET /api/v1/nodes/:nodeId` - Get node with inputs/outputs
+- [x] `PATCH /api/v1/nodes/:nodeId` - Update node
+- [x] `DELETE /api/v1/nodes/:nodeId` - Soft delete node
 
 ### 3.3 Node Inputs/Outputs
-- [ ] `POST /api/v1/nodes/:nodeId/inputs` - Add input
-- [ ] `DELETE /api/v1/nodes/:nodeId/inputs/:inputId` - Remove input
-- [ ] `POST /api/v1/nodes/:nodeId/outputs` - Add output
-- [ ] `DELETE /api/v1/nodes/:nodeId/outputs/:outputId` - Remove output
+- [x] `POST /api/v1/nodes/:nodeId/inputs` - Add input
+- [x] `DELETE /api/v1/nodes/:nodeId/inputs/:inputId` - Remove input
+- [x] `POST /api/v1/nodes/:nodeId/outputs` - Add output
+- [x] `DELETE /api/v1/nodes/:nodeId/outputs/:outputId` - Remove output
 
 ### 3.4 Node Versioning
-- [ ] `GET /api/v1/nodes/:nodeId/versions` - Get version history
-- [ ] `GET /api/v1/nodes/:nodeId/versions/:v` - Get specific version
-- [ ] `POST /api/v1/nodes/:nodeId/rollback/:v` - Rollback to version
-- [ ] Auto-create version on node update
+- [x] `GET /api/v1/nodes/:nodeId/versions` - Get version history
+- [x] `GET /api/v1/nodes/:nodeId/versions/:v` - Get specific version
+- [x] `POST /api/v1/nodes/:nodeId/rollback/:v` - Rollback to version
+- [x] Auto-create version on node update
 
 ### 3.5 Node Relationships
-- [ ] `GET /api/v1/nodes/:nodeId/children` - Get child nodes
-- [ ] `GET /api/v1/nodes/:nodeId/dependencies` - Get dependency graph
-- [ ] Parent-child tree queries
-- [ ] DAG dependency queries
+- [x] `GET /api/v1/nodes/:nodeId/children` - Get child nodes
+- [x] `GET /api/v1/nodes/:nodeId/dependencies` - Get dependency graph
+- [x] Parent-child tree queries
+- [x] DAG dependency queries
 
 ### 3.6 Node Locking
-- [ ] `POST /api/v1/nodes/:nodeId/lock` - Acquire lock
-- [ ] `DELETE /api/v1/nodes/:nodeId/lock` - Release lock
-- [ ] Lock expiration handling
-- [ ] Lock conflict responses
+- [x] `POST /api/v1/nodes/:nodeId/lock` - Acquire lock
+- [x] `DELETE /api/v1/nodes/:nodeId/lock` - Release lock
+- [x] Lock expiration handling (5 minute TTL)
+- [x] Lock conflict responses (409 Conflict)
 
 ### 3.7 Service Layer
-- [ ] ProjectService with DB queries
-- [ ] NodeService with complex queries
-- [ ] Version management logic
-- [ ] Lock management with Redis
+- [x] ProjectService with DB queries
+- [x] NodeService with complex queries
+- [x] Version management logic
+- [x] Lock management with Redis
 
 **Verification:** Create node with inputs/outputs, update it, verify version history.
 
 ---
 
-## Phase 4: File Handling
+## Phase 4: File Handling ✅ COMPLETE
 
 **Goal:** Upload files to S3, track metadata, dispatch processing jobs.
 
 ### 4.1 S3 Integration
-- [ ] S3 client configuration (LocalStack for dev)
-- [ ] Presigned URL generation for uploads
-- [ ] Presigned URL generation for downloads
+- [x] S3 client configuration (LocalStack for dev)
+- [x] Presigned URL generation for uploads
+- [x] Presigned URL generation for downloads
 
 ### 4.2 File Handlers
-- [ ] `POST /api/v1/orgs/:orgId/files/upload` - Get presigned upload URL
-- [ ] `POST /api/v1/files/:fileId/confirm` - Confirm upload complete
-- [ ] `GET /api/v1/files/:fileId` - Get file metadata + download URL
-- [ ] `DELETE /api/v1/files/:fileId` - Delete file
+- [x] `POST /api/v1/orgs/:orgId/files/upload` - Get presigned upload URL
+- [x] `POST /api/v1/files/:fileId/confirm` - Confirm upload complete
+- [x] `GET /api/v1/files/:fileId` - Get file metadata + download URL
+- [x] `DELETE /api/v1/files/:fileId` - Delete file
 
 ### 4.3 Job Dispatch
-- [ ] SQS client configuration (LocalStack for dev)
-- [ ] Dispatch file processing job on upload confirm
-- [ ] Job message format definition
+- [x] SQS client configuration (LocalStack for dev)
+- [x] Dispatch file processing job on upload confirm
+- [x] Job message format definition
 
 ### 4.4 Service Layer
-- [ ] FileService with DB queries
-- [ ] S3 operations wrapper
-- [ ] SQS producer wrapper
+- [x] FileService with DB queries
+- [x] S3 operations wrapper
+- [x] SQS producer wrapper
 
-**Verification:** Upload file via presigned URL, confirm, see processing job in queue.
+**Verification:** Upload file via presigned URL, confirm, see processing job in queue. ✅ Tested with curl.
 
 ---
 

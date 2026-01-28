@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -267,11 +268,156 @@ func NewProjectHandler(svc *services.ProjectService, logger *zap.Logger) *Projec
 	return &ProjectHandler{svc: svc, logger: logger}
 }
 
-func (h *ProjectHandler) List(c *gin.Context)   { c.JSON(http.StatusOK, gin.H{"data": []any{}}) }
-func (h *ProjectHandler) Create(c *gin.Context) { c.JSON(http.StatusCreated, gin.H{}) }
-func (h *ProjectHandler) Get(c *gin.Context)    { c.JSON(http.StatusOK, gin.H{}) }
-func (h *ProjectHandler) Update(c *gin.Context) { c.JSON(http.StatusOK, gin.H{}) }
-func (h *ProjectHandler) Delete(c *gin.Context) { c.JSON(http.StatusNoContent, nil) }
+func (h *ProjectHandler) List(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	orgID, err := uuid.Parse(c.Param("orgId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
+		return
+	}
+
+	projects, err := h.svc.ListByOrg(c.Request.Context(), orgID, userID)
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to list projects", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list projects"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": projects})
+}
+
+func (h *ProjectHandler) Create(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	orgID, err := uuid.Parse(c.Param("orgId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
+		return
+	}
+
+	var req services.CreateProjectRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	project, err := h.svc.Create(c.Request.Context(), orgID, userID, req)
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to create project", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create project"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, project)
+}
+
+func (h *ProjectHandler) Get(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	projectID, err := uuid.Parse(c.Param("projectId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+		return
+	}
+
+	project, err := h.svc.GetByID(c.Request.Context(), projectID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to get project", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get project"})
+		return
+	}
+
+	c.JSON(http.StatusOK, project)
+}
+
+func (h *ProjectHandler) Update(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	projectID, err := uuid.Parse(c.Param("projectId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+		return
+	}
+
+	var req services.UpdateProjectRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	project, err := h.svc.Update(c.Request.Context(), projectID, userID, req)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to update project", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project"})
+		return
+	}
+
+	c.JSON(http.StatusOK, project)
+}
+
+func (h *ProjectHandler) Delete(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	projectID, err := uuid.Parse(c.Param("projectId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+		return
+	}
+
+	err = h.svc.Delete(c.Request.Context(), projectID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to delete project", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete project"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
 
 // =====================================================
 // NODE HANDLER
@@ -286,22 +432,495 @@ func NewNodeHandler(svc *services.NodeService, logger *zap.Logger) *NodeHandler 
 	return &NodeHandler{svc: svc, logger: logger}
 }
 
-func (h *NodeHandler) List(c *gin.Context)             { c.JSON(http.StatusOK, gin.H{"data": []any{}}) }
-func (h *NodeHandler) Create(c *gin.Context)           { c.JSON(http.StatusCreated, gin.H{}) }
-func (h *NodeHandler) Get(c *gin.Context)              { c.JSON(http.StatusOK, gin.H{}) }
-func (h *NodeHandler) Update(c *gin.Context)           { c.JSON(http.StatusOK, gin.H{}) }
-func (h *NodeHandler) Delete(c *gin.Context)           { c.JSON(http.StatusNoContent, nil) }
-func (h *NodeHandler) ListVersions(c *gin.Context)     { c.JSON(http.StatusOK, gin.H{"data": []any{}}) }
-func (h *NodeHandler) GetVersion(c *gin.Context)       { c.JSON(http.StatusOK, gin.H{}) }
-func (h *NodeHandler) Rollback(c *gin.Context)         { c.JSON(http.StatusOK, gin.H{}) }
-func (h *NodeHandler) AddInput(c *gin.Context)         { c.JSON(http.StatusCreated, gin.H{}) }
-func (h *NodeHandler) RemoveInput(c *gin.Context)      { c.JSON(http.StatusNoContent, nil) }
-func (h *NodeHandler) AddOutput(c *gin.Context)        { c.JSON(http.StatusCreated, gin.H{}) }
-func (h *NodeHandler) RemoveOutput(c *gin.Context)     { c.JSON(http.StatusNoContent, nil) }
-func (h *NodeHandler) ListChildren(c *gin.Context)     { c.JSON(http.StatusOK, gin.H{"data": []any{}}) }
-func (h *NodeHandler) ListDependencies(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"data": []any{}}) }
-func (h *NodeHandler) AcquireLock(c *gin.Context)      { c.JSON(http.StatusOK, gin.H{}) }
-func (h *NodeHandler) ReleaseLock(c *gin.Context)      { c.JSON(http.StatusNoContent, nil) }
+func (h *NodeHandler) List(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	projectID, err := uuid.Parse(c.Param("projectId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+		return
+	}
+
+	var filters services.ListNodesRequest
+	if err := c.ShouldBindQuery(&filters); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query parameters"})
+		return
+	}
+
+	nodes, err := h.svc.ListByProject(c.Request.Context(), projectID, userID, filters)
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to list nodes", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list nodes"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": nodes})
+}
+
+func (h *NodeHandler) Create(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	projectID, err := uuid.Parse(c.Param("projectId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+		return
+	}
+
+	var req services.CreateNodeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	node, err := h.svc.Create(c.Request.Context(), projectID, userID, req)
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to create node", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create node"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, node)
+}
+
+func (h *NodeHandler) Get(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	node, err := h.svc.GetByID(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to get node", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get node"})
+		return
+	}
+
+	c.JSON(http.StatusOK, node)
+}
+
+func (h *NodeHandler) Update(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	var req services.UpdateNodeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	node, err := h.svc.Update(c.Request.Context(), nodeID, userID, req)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if errors.Is(err, services.ErrLockConflict) {
+		c.JSON(http.StatusConflict, gin.H{"error": "Node is locked by another user"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to update node", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update node"})
+		return
+	}
+
+	c.JSON(http.StatusOK, node)
+}
+
+func (h *NodeHandler) Delete(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	err = h.svc.Delete(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to delete node", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete node"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *NodeHandler) ListVersions(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	versions, err := h.svc.ListVersions(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to list versions", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list versions"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": versions})
+}
+
+func (h *NodeHandler) GetVersion(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	var version int
+	if _, err := fmt.Sscanf(c.Param("version"), "%d", &version); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid version number"})
+		return
+	}
+
+	nodeVersion, err := h.svc.GetVersion(c.Request.Context(), nodeID, userID, version)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Version not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to get version", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get version"})
+		return
+	}
+
+	c.JSON(http.StatusOK, nodeVersion)
+}
+
+func (h *NodeHandler) Rollback(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	var version int
+	if _, err := fmt.Sscanf(c.Param("version"), "%d", &version); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid version number"})
+		return
+	}
+
+	node, err := h.svc.Rollback(c.Request.Context(), nodeID, userID, version)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Version not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to rollback", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to rollback"})
+		return
+	}
+
+	c.JSON(http.StatusOK, node)
+}
+
+func (h *NodeHandler) AddInput(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	var req services.AddInputRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	input, err := h.svc.AddInput(c.Request.Context(), nodeID, userID, req)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to add input", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add input"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, input)
+}
+
+func (h *NodeHandler) RemoveInput(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	inputID, err := uuid.Parse(c.Param("inputId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input ID"})
+		return
+	}
+
+	err = h.svc.RemoveInput(c.Request.Context(), nodeID, inputID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Input not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to remove input", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove input"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *NodeHandler) AddOutput(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	var req services.AddOutputRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	output, err := h.svc.AddOutput(c.Request.Context(), nodeID, userID, req)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to add output", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add output"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, output)
+}
+
+func (h *NodeHandler) RemoveOutput(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	outputID, err := uuid.Parse(c.Param("outputId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid output ID"})
+		return
+	}
+
+	err = h.svc.RemoveOutput(c.Request.Context(), nodeID, outputID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Output not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to remove output", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove output"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *NodeHandler) ListChildren(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	children, err := h.svc.ListChildren(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to list children", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list children"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": children})
+}
+
+func (h *NodeHandler) ListDependencies(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	deps, err := h.svc.ListDependencies(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Node not found"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to list dependencies", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list dependencies"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": deps})
+}
+
+func (h *NodeHandler) AcquireLock(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	err = h.svc.AcquireLock(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrLockConflict) {
+		c.JSON(http.StatusConflict, gin.H{"error": "Node is locked by another user"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to acquire lock", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to acquire lock"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Lock acquired"})
+}
+
+func (h *NodeHandler) ReleaseLock(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	nodeID, err := uuid.Parse(c.Param("nodeId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid node ID"})
+		return
+	}
+
+	err = h.svc.ReleaseLock(c.Request.Context(), nodeID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Lock not found or not owned by you"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to release lock", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to release lock"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
 
 // =====================================================
 // FILE HANDLER
@@ -316,10 +935,131 @@ func NewFileHandler(svc *services.FileService, logger *zap.Logger) *FileHandler 
 	return &FileHandler{svc: svc, logger: logger}
 }
 
-func (h *FileHandler) GetUploadURL(c *gin.Context)  { c.JSON(http.StatusOK, gin.H{}) }
-func (h *FileHandler) ConfirmUpload(c *gin.Context) { c.JSON(http.StatusOK, gin.H{}) }
-func (h *FileHandler) Get(c *gin.Context)           { c.JSON(http.StatusOK, gin.H{}) }
-func (h *FileHandler) Delete(c *gin.Context)        { c.JSON(http.StatusNoContent, nil) }
+// GetUploadURL generates a presigned URL for file upload
+func (h *FileHandler) GetUploadURL(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	orgID, err := uuid.Parse(c.Param("orgId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
+		return
+	}
+
+	var req services.UploadURLRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	resp, err := h.svc.GetUploadURL(c.Request.Context(), orgID, userID, req)
+	if err != nil {
+		h.logger.Error("Failed to get upload URL", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate upload URL"})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+// ConfirmUpload confirms that a file has been uploaded to S3
+func (h *FileHandler) ConfirmUpload(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	fileID, err := uuid.Parse(c.Param("fileId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID"})
+		return
+	}
+
+	file, err := h.svc.ConfirmUpload(c.Request.Context(), fileID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		return
+	}
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to confirm upload", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, file)
+}
+
+// Get returns file metadata and a download URL
+func (h *FileHandler) Get(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	fileID, err := uuid.Parse(c.Param("fileId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID"})
+		return
+	}
+
+	file, err := h.svc.GetByID(c.Request.Context(), fileID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		return
+	}
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to get file", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get file"})
+		return
+	}
+
+	c.JSON(http.StatusOK, file)
+}
+
+// Delete deletes a file from S3 and the database
+func (h *FileHandler) Delete(c *gin.Context) {
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	fileID, err := uuid.Parse(c.Param("fileId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID"})
+		return
+	}
+
+	err = h.svc.Delete(c.Request.Context(), fileID, userID)
+	if errors.Is(err, services.ErrNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		return
+	}
+	if errors.Is(err, services.ErrForbidden) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+	if err != nil {
+		h.logger.Error("Failed to delete file", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete file"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
 
 // =====================================================
 // EXECUTION HANDLER

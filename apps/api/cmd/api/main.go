@@ -13,7 +13,9 @@ import (
 	"github.com/glassbox/api/internal/database"
 	"github.com/glassbox/api/internal/handlers"
 	"github.com/glassbox/api/internal/middleware"
+	"github.com/glassbox/api/internal/queue"
 	"github.com/glassbox/api/internal/services"
+	"github.com/glassbox/api/internal/storage"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -55,8 +57,20 @@ func main() {
 	}
 	defer redis.Close()
 
+	// Initialize S3 client
+	s3Client, err := storage.NewS3Client(cfg, logger)
+	if err != nil {
+		logger.Fatal("Failed to initialize S3 client", zap.Error(err))
+	}
+
+	// Initialize SQS client
+	sqsClient, err := queue.NewSQSClient(cfg, logger)
+	if err != nil {
+		logger.Fatal("Failed to initialize SQS client", zap.Error(err))
+	}
+
 	// Initialize services
-	svc := services.NewServices(db, redis, cfg, logger)
+	svc := services.NewServices(db, redis, s3Client, sqsClient, cfg, logger)
 
 	// Initialize handlers
 	h := handlers.NewHandlers(svc, logger)
