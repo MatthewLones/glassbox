@@ -1,0 +1,97 @@
+# Full-stack docker-compose for local development
+# Includes all infrastructure + application services
+# Usage: docker compose -f docker-compose.yml -f docker-compose.full.yml up
+
+services:
+  # Go API
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    container_name: glassbox-api
+    ports:
+      - "8080:8080"
+    environment:
+      - GO_ENV=development
+      - PORT=8080
+      - DATABASE_URL=postgres://glassbox:glassbox_dev@postgres:5432/glassbox?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_BUCKET=glassbox-files
+      - SQS_AGENT_QUEUE_URL=http://localstack:4566/000000000000/glassbox-agent-jobs
+      - SQS_FILE_QUEUE_URL=http://localstack:4566/000000000000/glassbox-file-jobs
+      - JWT_SECRET=dev-secret-change-in-production
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Agent Worker
+  agent-worker:
+    build:
+      context: ../apps/workers
+      dockerfile: Dockerfile
+    container_name: glassbox-agent-worker
+    command: ["python", "-m", "agent.worker"]
+    environment:
+      - DATABASE_URL=postgres://glassbox:glassbox_dev@postgres:5432/glassbox
+      - REDIS_URL=redis://redis:6379
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_BUCKET=glassbox-files
+      - SQS_AGENT_QUEUE_URL=http://localstack:4566/000000000000/glassbox-agent-jobs
+      - SQS_FILE_QUEUE_URL=http://localstack:4566/000000000000/glassbox-file-jobs
+      # Set your API keys for LLM access
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # File Processor Worker
+  file-processor:
+    build:
+      context: ../apps/workers
+      dockerfile: Dockerfile
+    container_name: glassbox-file-processor
+    command: ["python", "-m", "file_processor.worker"]
+    environment:
+      - DATABASE_URL=postgres://glassbox:glassbox_dev@postgres:5432/glassbox
+      - REDIS_URL=redis://redis:6379
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_BUCKET=glassbox-files
+      - SQS_AGENT_QUEUE_URL=http://localstack:4566/000000000000/glassbox-agent-jobs
+      - SQS_FILE_QUEUE_URL=http://localstack:4566/000000000000/glassbox-file-jobs
+      # Set your API key for embeddings
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    restart: unless-stopped

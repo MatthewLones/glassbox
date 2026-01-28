@@ -1,0 +1,333 @@
+# Deployment workflow
+# - Manual deployment only (recommended during dev/testing phase)
+# - When ready for continuous deployment, uncomment the push trigger below
+
+name: Deploy
+
+on:
+  # AUTO-DEPLOY DISABLED during development phase
+  # Uncomment this block when ready for continuous deployment:
+  # push:
+  #   branches: [main]
+
+  # Manual deployment via GitHub Actions UI
+  # Go to: Actions → Deploy → Run workflow
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip tests (emergency deploys only)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION: us-east-1
+  GO_VERSION: '1.22'
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.12'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # Determine environment
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      should_run_tests: ${{ steps.env.outputs.should_run_tests }}
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "should_run_tests=${{ inputs.skip_tests == false }}" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "should_run_tests=true" >> $GITHUB_OUTPUT
+          fi
+
+  # Run tests (unless skipped)
+  test:
+    name: Test
+    needs: setup
+    if: needs.setup.outputs.should_run_tests == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: glassbox_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: apps/api/go.sum
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: apps/workers/requirements.txt
+
+      - name: Run API tests
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgres://test:test@localhost:5432/glassbox_test?sslmode=disable
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret
+        run: go test -v ./...
+
+      - name: Install Python deps and run tests
+        working-directory: apps/workers
+        env:
+          DATABASE_URL: postgres://test:test@localhost:5432/glassbox_test
+          REDIS_URL: redis://localhost:6379
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+          pytest -v
+
+  # Build and push Docker images
+  build-api:
+    name: Build API
+    needs: [setup, test]
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    outputs:
+      image: ${{ steps.build.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/api
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/glassbox-${{ needs.setup.outputs.environment }}-api:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/glassbox-${{ needs.setup.outputs.environment }}-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Output image
+        run: |
+          echo "image=${{ steps.login-ecr.outputs.registry }}/glassbox-${{ needs.setup.outputs.environment }}-api:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+  build-workers:
+    name: Build Workers
+    needs: [setup, test]
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    outputs:
+      image: ${{ steps.build.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/workers
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/glassbox-${{ needs.setup.outputs.environment }}-workers:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/glassbox-${{ needs.setup.outputs.environment }}-workers:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Output image
+        run: |
+          echo "image=${{ steps.login-ecr.outputs.registry }}/glassbox-${{ needs.setup.outputs.environment }}-workers:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+  # Deploy infrastructure (only if there are changes)
+  deploy-infra:
+    name: Deploy Infrastructure
+    needs: [setup, build-api, build-workers]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/infrastructure/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/infrastructure
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: CDK Deploy
+        working-directory: apps/infrastructure
+        run: |
+          npx cdk deploy \
+            --context environment=${{ needs.setup.outputs.environment }} \
+            --require-approval never \
+            --all
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ env.AWS_REGION }}
+
+  # Update ECS services with new images
+  deploy-services:
+    name: Deploy Services
+    needs: [setup, deploy-infra]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy API service
+        run: |
+          aws ecs update-service \
+            --cluster glassbox-${{ needs.setup.outputs.environment }} \
+            --service glassbox-${{ needs.setup.outputs.environment }}-api \
+            --force-new-deployment
+
+      - name: Deploy Agent Worker service
+        run: |
+          aws ecs update-service \
+            --cluster glassbox-${{ needs.setup.outputs.environment }} \
+            --service glassbox-${{ needs.setup.outputs.environment }}-agent-worker \
+            --force-new-deployment
+
+      - name: Deploy File Worker service
+        run: |
+          aws ecs update-service \
+            --cluster glassbox-${{ needs.setup.outputs.environment }} \
+            --service glassbox-${{ needs.setup.outputs.environment }}-file-worker \
+            --force-new-deployment
+
+      - name: Wait for API deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster glassbox-${{ needs.setup.outputs.environment }} \
+            --services glassbox-${{ needs.setup.outputs.environment }}-api
+
+  # Run smoke tests after deployment
+  smoke-test:
+    name: Smoke Test
+    needs: [setup, deploy-services]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Health check
+        run: |
+          HEALTH_URL="https://api.${{ needs.setup.outputs.environment }}.glassbox.dev/health"
+          for i in {1..30}; do
+            if curl -sf "$HEALTH_URL" > /dev/null; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+          echo "Health check failed after 30 attempts"
+          exit 1
+
+  # Notify on completion
+  notify:
+    name: Notify
+    needs: [setup, smoke-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "Deployment to ${{ needs.setup.outputs.environment }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*GlassBox Deployment*\n*Environment:* ${{ needs.setup.outputs.environment }}\n*Status:* ${{ needs.smoke-test.result == 'success' && '✅ Success' || '❌ Failed' }}\n*Commit:* `${{ github.sha }}`\n*Author:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

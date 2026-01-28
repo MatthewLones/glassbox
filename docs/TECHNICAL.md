@@ -1741,19 +1741,26 @@ Retention:
 | Node versioning | ✅ Complete | Auto-version on update, rollback support |
 | Node relationships | ✅ Complete | Children + dependencies queries |
 | Node locking | ✅ Complete | Redis + DB distributed locks |
-| Python agent worker | 🔶 Partial | LangGraph structure, needs SQS integration |
+| File handling | ✅ Complete | S3 presigned URLs, upload/download |
+| Agent execution | ✅ Complete | Start, pause, resume, cancel, HITL |
+| File processing | ✅ Complete | PDF, DOCX, text extraction |
+| Search & RAG | ✅ Complete | Text search, semantic search, node context |
+| WebSocket | ✅ Complete | Hub, subscriptions, presence, pub/sub |
+| AWS CDK Infrastructure | ✅ Complete | All 8 stacks (Network, Database, Cache, Storage, Messaging, Auth, Compute, Monitoring) |
+| CI/CD | ✅ Complete | GitHub Actions for CI, deploy staging/production |
+| Docker | ✅ Complete | Dockerfiles for API and workers |
 
-### In Progress (Phase 4)
+### In Progress (Phase 10)
 
-- File handling (S3 presigned URLs)
-- SQS job dispatch
+- Unit tests for Go services
+- Unit tests for Python workers
+- API documentation (OpenAPI/Swagger)
 
 ### Not Started
 
-- Agent execution endpoints
-- WebSocket service
-- Search/RAG endpoints
-- AWS CDK infrastructure
+- Next.js frontend implementation
+- Production deployment to AWS
+- Load testing
 
 ## Next Steps
 
@@ -1761,13 +1768,15 @@ Retention:
 2. ~~Create database schema~~ ✅
 3. ~~Build Go API skeleton~~ ✅
 4. ~~Implement Project & Node APIs~~ ✅
-5. **Implement file upload with S3** ← Current focus
-6. Wire up Python agent worker with SQS
-7. Build Next.js frontend
-8. Deploy to staging with AWS CDK
+5. ~~Implement file upload with S3~~ ✅
+6. ~~Wire up Python agent worker with SQS~~ ✅
+7. ~~Implement WebSocket for real-time~~ ✅
+8. ~~Create AWS CDK infrastructure~~ ✅
+9. **Build Next.js frontend** ← Next focus (v2 roadmap)
+10. Deploy to staging with AWS CDK
 
 ---
 
 *This document will be updated as architectural decisions evolve and new requirements emerge.*
 
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-01-28

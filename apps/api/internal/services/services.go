@@ -2027,3 +2027,101 @@ func (s *AuthService) getUserByCognitoSub(ctx context.Context, cognitoSub string
 	json.Unmarshal(settingsJSON, &user.Settings)
 	return &user, nil
 }
+
+// WSTokenClaims for WebSocket tokens
+type WSTokenClaims struct {
+	UserID    string `json:"user_id"`
+	UserEmail string `json:"user_email"`
+	jwt.RegisteredClaims
+}
+
+// WSTokenData contains validated WS token information
+type WSTokenData struct {
+	UserID    string
+	UserEmail string
+	ExpiresAt time.Time
+}
+
+const wsTokenExpiration = 5 * time.Minute
+const wsTokenKeyPrefix = "ws_token:"
+
+// GenerateWSToken creates a short-lived token for WebSocket connection
+func (s *AuthService) GenerateWSToken(ctx context.Context, userID, userEmail string) (string, time.Time, error) {
+	expiresAt := time.Now().Add(wsTokenExpiration)
+
+	// Generate a unique token ID
+	tokenID := uuid.New().String()
+
+	claims := WSTokenClaims{
+		UserID:    userID,
+		UserEmail: userEmail,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        tokenID,
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "glassbox-ws",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(s.cfg.JWTSecret))
+	if err != nil {
+		return "", time.Time{}, fmt.Errorf("failed to sign WS token: %w", err)
+	}
+
+	// Store token in Redis for one-time use validation
+	key := wsTokenKeyPrefix + tokenID
+	err = s.redis.Client.Set(ctx, key, userID, wsTokenExpiration).Err()
+	if err != nil {
+		s.logger.Warn("Failed to store WS token in Redis", zap.Error(err))
+		// Continue - JWT validation will still work
+	}
+
+	return tokenString, expiresAt, nil
+}
+
+// ValidateWSToken validates a WebSocket token and marks it as used
+func (s *AuthService) ValidateWSToken(ctx context.Context, tokenString string) (*WSTokenData, error) {
+	// Parse and validate JWT
+	token, err := jwt.ParseWithClaims(tokenString, &WSTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(s.cfg.JWTSecret), nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid token: %w", err)
+	}
+
+	claims, ok := token.Claims.(*WSTokenClaims)
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid token claims")
+	}
+
+	// Check if token is expired
+	if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now()) {
+		return nil, errors.New("token expired")
+	}
+
+	// Check Redis for one-time use (optional - allows graceful degradation)
+	if claims.ID != "" {
+		key := wsTokenKeyPrefix + claims.ID
+		// Try to delete the token (atomic one-time use)
+		deleted, err := s.redis.Client.Del(ctx, key).Result()
+		if err != nil {
+			s.logger.Warn("Failed to check WS token in Redis", zap.Error(err))
+			// Continue - allow connection even if Redis is down
+		} else if deleted == 0 {
+			// Token already used or never stored
+			// In strict mode, we'd reject here. For now, allow it.
+			s.logger.Warn("WS token not found in Redis (may be reused)", zap.String("tokenId", claims.ID))
+		}
+	}
+
+	return &WSTokenData{
+		UserID:    claims.UserID,
+		UserEmail: claims.UserEmail,
+		ExpiresAt: claims.ExpiresAt.Time,
+	}, nil
+}

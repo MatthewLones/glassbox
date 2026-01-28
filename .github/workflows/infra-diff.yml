@@ -1,0 +1,115 @@
+# Infrastructure diff workflow
+# Shows CDK diff on PRs that change infrastructure
+
+name: Infrastructure Diff
+
+on:
+  pull_request:
+    paths:
+      - 'apps/infrastructure/**'
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '20'
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  diff:
+    name: CDK Diff
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [staging, production]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/infrastructure/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/infrastructure
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: CDK Diff
+        id: diff
+        working-directory: apps/infrastructure
+        continue-on-error: true
+        run: |
+          npx cdk diff \
+            --context environment=${{ matrix.environment }} \
+            --all 2>&1 | tee diff-output.txt
+
+          # Capture output for PR comment
+          {
+            echo 'diff<<EOF'
+            cat diff-output.txt
+            echo EOF
+          } >> $GITHUB_OUTPUT
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ env.AWS_REGION }}
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const diff = `${{ steps.diff.outputs.diff }}`;
+            const environment = '${{ matrix.environment }}';
+
+            // Truncate if too long
+            const maxLength = 60000;
+            const truncatedDiff = diff.length > maxLength
+              ? diff.substring(0, maxLength) + '\n\n... (truncated)'
+              : diff;
+
+            const body = `## CDK Diff for \`${environment}\`
+
+            <details>
+            <summary>Click to expand</summary>
+
+            \`\`\`
+            ${truncatedDiff}
+            \`\`\`
+
+            </details>
+            `;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const marker = `## CDK Diff for \`${environment}\``;
+            const existingComment = comments.find(c => c.body.includes(marker));
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

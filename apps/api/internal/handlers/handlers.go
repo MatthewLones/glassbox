@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/glassbox/api/internal/middleware"
@@ -100,10 +101,28 @@ func (h *AuthHandler) GenerateDevToken(c *gin.Context) {
 }
 
 func (h *AuthHandler) GetWSToken(c *gin.Context) {
-	// TODO: Implement WS token generation
+	userID, err := getUserUUID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Get user email from context
+	userEmail := middleware.GetEmail(c)
+	if userEmail == "" {
+		userEmail = "unknown@unknown.com"
+	}
+
+	token, expiresAt, err := h.svc.GenerateWSToken(c.Request.Context(), userID.String(), userEmail)
+	if err != nil {
+		h.logger.Error("Failed to generate WS token", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"token":     "ws-token-placeholder",
-		"expiresAt": "2024-01-15T10:05:00Z",
+		"token":     token,
+		"expiresAt": expiresAt.Format(time.RFC3339),
 	})
 }
 

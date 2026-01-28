@@ -9,6 +9,150 @@ This document logs all significant changes made during development. Each entry i
 
 ---
 
+## [2026-01-28] Phase 9: Infrastructure & Deployment
+
+### Summary
+Implemented complete AWS infrastructure using CDK, Docker containerization for all services, and CI/CD pipelines with GitHub Actions for automated testing and deployment.
+
+### Justification
+Phase 9 provides the infrastructure foundation needed to deploy GlassBox to AWS. This includes all necessary cloud resources (VPC, databases, caches, compute), containerization for portable deployments, and CI/CD automation for reliable releases.
+
+### Technical Details
+
+**AWS CDK Infrastructure (`apps/infrastructure/`):**
+- Network Stack: VPC with public/private/isolated subnets, NAT gateway, security groups
+- Database Stack: RDS PostgreSQL with pgvector extension, automated backups, multi-AZ support for production
+- Cache Stack: ElastiCache Redis for session cache, rate limiting, pub/sub
+- Storage Stack: S3 bucket for file storage, CloudFront CDN distribution
+- Messaging Stack: SQS queues for agent and file processing with DLQs
+- Auth Stack: Cognito user pool with email/password and social auth
+- Compute Stack: ECS Fargate cluster with API, agent worker, and file worker services, ALB, auto-scaling
+- Monitoring Stack: CloudWatch dashboard and alarms for all services
+
+**Docker Configuration:**
+- `apps/api/Dockerfile`: Multi-stage Go build with alpine runtime
+- `apps/workers/Dockerfile`: Python 3.12 slim image with dual worker support
+- `docker/docker-compose.full.yml`: Full-stack local development with API and workers
+
+**CI/CD Workflows (`.github/workflows/`):**
+- `ci.yml`: Comprehensive CI pipeline with Go lint/test/build, Python lint/test, CDK synth, Docker builds
+- `deploy.yml`: Automated deployment to staging on merge, manual production deployments
+- `infra-diff.yml`: Infrastructure diff comments on PRs that change CDK code
+
+**Environment Configurations:**
+- `apps/infrastructure/config/staging.ts`: Cost-optimized staging environment
+- `apps/infrastructure/config/production.ts`: High-availability production environment
+
+### Files Created
+- `apps/api/Dockerfile` - Multi-stage Go API build
+- `apps/workers/Dockerfile` - Python workers image
+- `docker/docker-compose.full.yml` - Full-stack docker-compose
+- `apps/infrastructure/package.json` - CDK dependencies
+- `apps/infrastructure/tsconfig.json` - TypeScript configuration
+- `apps/infrastructure/cdk.json` - CDK app configuration
+- `apps/infrastructure/bin/glassbox.ts` - CDK entry point
+- `apps/infrastructure/lib/network-stack.ts` - VPC and security groups
+- `apps/infrastructure/lib/database-stack.ts` - RDS PostgreSQL
+- `apps/infrastructure/lib/cache-stack.ts` - ElastiCache Redis
+- `apps/infrastructure/lib/storage-stack.ts` - S3 and CloudFront
+- `apps/infrastructure/lib/messaging-stack.ts` - SQS queues
+- `apps/infrastructure/lib/auth-stack.ts` - Cognito
+- `apps/infrastructure/lib/compute-stack.ts` - ECS Fargate
+- `apps/infrastructure/lib/monitoring-stack.ts` - CloudWatch dashboard
+- `apps/infrastructure/config/staging.ts` - Staging configuration
+- `apps/infrastructure/config/production.ts` - Production configuration
+- `apps/infrastructure/config/index.ts` - Config loader
+- `.github/workflows/ci.yml` - CI workflow
+- `.github/workflows/deploy.yml` - Deploy workflow
+- `.github/workflows/infra-diff.yml` - Infrastructure diff workflow
+
+### Files Modified
+- `docs/ROADMAP.md` - Marked Phase 9 complete
+- `docs/CHANGELOG.md` - Added this entry
+
+### Deployment Requirements
+To deploy to AWS:
+1. Configure AWS credentials with appropriate permissions
+2. Set up GitHub secrets: `AWS_DEPLOY_ROLE_ARN`, `AWS_ACCOUNT_ID`, `SLACK_WEBHOOK_URL` (optional)
+3. Run `npx cdk bootstrap` for first-time CDK setup
+4. Run `npx cdk deploy --all --context environment=staging`
+
+---
+
+## [2026-01-28] Phase 8: Real-Time WebSocket
+
+### Summary
+Implemented complete WebSocket server for real-time collaboration features including connection management, authentication, subscriptions, presence tracking, and Redis pub/sub for multi-instance support.
+
+### Justification
+Real-time collaboration is a core feature of GlassBox - users need to see live updates when nodes are created/edited by teammates, track who's viewing what, and receive execution status updates as they happen. WebSocket infrastructure enables Figma/Google Docs-style collaboration.
+
+### Technical Details
+
+**WebSocket Package (`apps/api/internal/websocket/`):**
+- `messages.go` - Message types for client/server communication:
+  - Client messages: subscribe, unsubscribe, presence, lock_acquire, lock_release, ping
+  - Server messages: subscribed, node_updated, presence_update, execution_update, etc.
+- `hub.go` - Central hub for connection management:
+  - Client registration/unregistration
+  - Channel-based subscriptions (project:uuid, node:uuid)
+  - Presence tracking per node
+  - Redis pub/sub integration for multi-instance broadcasting
+- `client.go` - WebSocket client handler:
+  - Read/write pumps with ping/pong for keepalive
+  - Message parsing and routing
+  - Subscription and presence handling
+- `handler.go` - HTTP upgrade handler for WebSocket connections
+- `broadcaster.go` - Interface for broadcasting events:
+  - BroadcastNodeCreated/Updated/Deleted
+  - BroadcastLockAcquired/Released
+  - BroadcastExecutionUpdate
+
+**Authentication (`apps/api/internal/services/services.go`):**
+- `GenerateWSToken` - Creates short-lived (5 min) JWT for WebSocket auth
+- `ValidateWSToken` - Validates token and marks as used (one-time use via Redis)
+
+**Routes:**
+- `POST /api/v1/auth/ws-token` - Exchange JWT for WebSocket token
+- `GET /ws?token=<ws_token>` - WebSocket upgrade endpoint
+
+**Message Protocol:**
+```json
+// Client -> Server
+{"type": "subscribe", "payload": {"channel": "project:uuid"}, "requestId": "123"}
+{"type": "presence", "payload": {"nodeId": "uuid", "action": "editing"}}
+{"type": "ping", "requestId": "456"}
+
+// Server -> Client
+{"type": "subscribed", "payload": {"channel": "project:uuid", "users": ["a@b.com"]}}
+{"type": "node_updated", "payload": {"nodeId": "uuid", "title": "...", "updatedBy": "..."}}
+{"type": "pong", "requestId": "456"}
+```
+
+### Files Created
+- `apps/api/internal/websocket/messages.go` - Message types and serialization
+- `apps/api/internal/websocket/hub.go` - Connection hub and channel management
+- `apps/api/internal/websocket/client.go` - WebSocket client handling
+- `apps/api/internal/websocket/handler.go` - HTTP upgrade handler
+- `apps/api/internal/websocket/broadcaster.go` - Event broadcasting interface
+
+### Files Modified
+- `apps/api/internal/services/services.go` - Added WSToken methods to AuthService
+- `apps/api/internal/handlers/handlers.go` - Implemented GetWSToken handler
+- `apps/api/cmd/api/main.go` - Added WebSocket hub initialization and /ws route
+- `apps/api/go.mod` - Added gorilla/websocket dependency
+- `docs/ROADMAP.md` - Marked Phase 8 complete
+- `docs/CHANGELOG.md` - Added this entry
+
+### Verification
+WebSocket test passed:
+1. Get dev token -> Get WS token (5 min TTL)
+2. Connect to ws://localhost:8080/ws?token=...
+3. Send ping -> Receive pong
+4. Subscribe to project channel -> Receive confirmation with user list
+
+---
+
 ## [2026-01-28] Phase 6 & 7: File Processing & Search API
 
 ### Summary

@@ -16,6 +16,7 @@ import (
 	"github.com/glassbox/api/internal/queue"
 	"github.com/glassbox/api/internal/services"
 	"github.com/glassbox/api/internal/storage"
+	"github.com/glassbox/api/internal/websocket"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -75,8 +76,28 @@ func main() {
 	// Initialize handlers
 	h := handlers.NewHandlers(svc, logger)
 
+	// Initialize WebSocket hub
+	wsHub := websocket.NewHub(redis, logger)
+	go wsHub.Run()
+
+	// Create WebSocket token validator using auth service
+	wsTokenValidator := func(ctx context.Context, token string) (*websocket.WSTokenData, error) {
+		data, err := svc.Auth.ValidateWSToken(ctx, token)
+		if err != nil {
+			return nil, err
+		}
+		return &websocket.WSTokenData{
+			UserID:    data.UserID,
+			UserEmail: data.UserEmail,
+			ExpiresAt: data.ExpiresAt,
+		}, nil
+	}
+
+	// Initialize WebSocket handler
+	wsHandler := websocket.NewHandler(wsHub, redis, wsTokenValidator, logger)
+
 	// Setup router
-	router := setupRouter(cfg, h, logger)
+	router := setupRouter(cfg, h, wsHandler, logger)
 
 	// Create server
 	srv := &http.Server{
@@ -102,6 +123,9 @@ func main() {
 
 	logger.Info("Shutting down server...")
 
+	// Stop WebSocket hub
+	wsHub.Stop()
+
 	// Graceful shutdown with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -120,7 +144,7 @@ func initLogger() (*zap.Logger, error) {
 	return zap.NewDevelopment()
 }
 
-func setupRouter(cfg *config.Config, h *handlers.Handlers, logger *zap.Logger) *gin.Engine {
+func setupRouter(cfg *config.Config, h *handlers.Handlers, wsHandler *websocket.Handler, logger *zap.Logger) *gin.Engine {
 	if cfg.Environment == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -135,6 +159,9 @@ func setupRouter(cfg *config.Config, h *handlers.Handlers, logger *zap.Logger) *
 
 	// Health check (no auth required)
 	r.GET("/health", h.Health.Check)
+
+	// WebSocket endpoint (auth via token query param)
+	r.GET("/ws", wsHandler.ServeWS)
 
 	// API v1 routes
 	v1 := r.Group("/api/v1")

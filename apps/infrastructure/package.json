@@ -1,0 +1,26 @@
+{
+  "name": "@glassbox/infrastructure",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "synth": "cdk synth",
+    "diff": "cdk diff",
+    "deploy": "cdk deploy --all",
+    "deploy:staging": "cdk deploy --all -c environment=staging",
+    "deploy:production": "cdk deploy --all -c environment=production",
+    "destroy": "cdk destroy --all"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.120.0",
+    "constructs": "^10.3.0",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "aws-cdk": "^2.120.0",
+    "typescript": "^5.3.0"
+  }
+}
