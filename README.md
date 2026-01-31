@@ -183,6 +183,8 @@ See [TECHNICAL.md](docs/TECHNICAL.md) for full API documentation.
 - **[PRD.md](docs/PRD.md)** — Product vision, node anatomy, collaboration features
 - **[TECHNICAL.md](docs/TECHNICAL.md)** — Architecture, data models, API design
 - **[CHANGELOG.md](docs/CHANGELOG.md)** — Development log with all changes
+- **[V1 Backend Docs](docs/v1/README.md)** — Complete backend implementation guide
+- **[V2 Frontend Docs](docs/v2/README.md)** — Complete frontend implementation guide
 
 ## Development Status
 
@@ -195,19 +197,16 @@ See [TECHNICAL.md](docs/TECHNICAL.md) for full API documentation.
 - WebSocket real-time updates
 - AWS CDK infrastructure
 
-### Frontend (In Progress)
+### Frontend (Complete)
 - [x] Shadcn/ui component library
-- [x] Authentication flow
+- [x] Authentication flow (Cognito + dev mode)
 - [x] Organization & project management
 - [x] Tree view with node CRUD
 - [x] Node detail panel
-- [x] Canvas view (Reactflow)
+- [x] Canvas view (ReactFlow)
 - [x] Graph view (d3-force)
 - [x] Grid view (file explorer)
-- [ ] Agent execution UI
-- [ ] WebSocket integration
-- [ ] Search (Cmd+K)
-
-## License
-
-Proprietary — All rights reserved.
+- [x] Agent execution UI with traces
+- [x] WebSocket integration (presence, locks, live updates)
+- [x] Search (Cmd+K command palette)
+- [x] Notifications system
