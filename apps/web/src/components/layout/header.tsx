@@ -2,11 +2,10 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Search, User, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +17,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/lib/auth';
 import { Breadcrumbs } from './breadcrumbs';
+import { SearchTrigger } from '@/components/search';
+import { NotificationPanel } from '@/components/notifications';
 
 interface HeaderProps {
   className?: string;
@@ -54,25 +55,13 @@ export function Header({ className, title, actions }: HeaderProps) {
         {/* Page actions */}
         {actions}
 
-        {/* Search */}
+        {/* Search trigger - opens Cmd+K dialog */}
         <div className="hidden md:flex">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search... (Cmd+K)"
-              className="w-64 pl-9 glass-subtle"
-              readOnly
-            />
-          </div>
+          <SearchTrigger className="w-64" />
         </div>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          {/* Notification badge */}
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />
-          <span className="sr-only">Notifications</span>
-        </Button>
+        <NotificationPanel />
 
         {/* User menu */}
         <DropdownMenu>

@@ -9,6 +9,147 @@ This document logs all significant changes made during development. Each entry i
 
 ---
 
+## [2026-01-31] V2 Frontend Documentation Suite
+
+### Summary
+Created comprehensive documentation for the V2 frontend under `docs/v2/`, matching the detailed, explanatory style of the v1 backend docs. Nine documentation files covering architecture, components, hooks, state management, WebSocket, authentication, API client, and view modes.
+
+### Justification
+- Provide complete reference for frontend implementation
+- Document how to connect frontend to backend
+- Enable future development and onboarding
+- Match quality and depth of v1 backend documentation
+
+### Technical Details
+
+**Documentation Structure:**
+- `README.md` - Entry point with technology stack diagram, directory structure, quick reference
+- `ARCHITECTURE.md` - System design with ASCII diagrams for component hierarchy, data flow, WebSocket communication
+- `AUTHENTICATION.md` - Cognito OAuth flow, token management, dev login, protected routes
+- `API_CLIENT.md` - Complete REST API endpoints, error handling, React Query integration
+- `STATE.md` - Zustand stores (app, canvas, execution), React Query configuration, state flow patterns
+- `HOOKS.md` - All custom hooks with signatures, parameters, return values, usage examples
+- `WEBSOCKET.md` - WebSocket client, message types, presence, locks, connection management
+- `COMPONENTS.md` - 118 components across 22 categories with props and examples
+- `VIEWS.md` - Four view modes (tree, canvas, graph, grid) with implementation details
+
+**Key Documentation Features:**
+- ASCII diagrams for visual architecture understanding
+- Tables for configuration, endpoints, and message types
+- TypeScript code examples throughout
+- Backend Integration sections explaining what's needed from backend
+- Best Practices sections for each topic
+
+**Total Documentation:**
+- 9 files
+- ~3,800 lines of detailed documentation
+- Comprehensive coverage of all frontend systems
+
+### Files Modified
+
+**New Files:**
+- `docs/v2/README.md`
+- `docs/v2/ARCHITECTURE.md`
+- `docs/v2/AUTHENTICATION.md`
+- `docs/v2/API_CLIENT.md`
+- `docs/v2/STATE.md`
+- `docs/v2/HOOKS.md`
+- `docs/v2/WEBSOCKET.md`
+- `docs/v2/COMPONENTS.md`
+- `docs/v2/VIEWS.md`
+
+---
+
+## [2026-01-31] V2 Phases 11-13: WebSocket, Search, and Notifications
+
+### Summary
+Completed three major phases: WebSocket real-time integration (Phase 11), global search with Cmd+K (Phase 12), and in-app notifications (Phase 13). Also fixed UI bug with detail panel header overlap in canvas view.
+
+### Justification
+- **WebSocket**: Real-time collaboration is essential for multi-user environments - presence indicators, node locking, and live updates
+- **Search**: Fast navigation across large projects requires Cmd+K command palette pattern
+- **Notifications**: Users need to stay informed about project changes, execution status, and HITL requests
+
+### Technical Details
+
+**Phase 11 - WebSocket Integration:**
+- `lib/websocket/types.ts` - Comprehensive message types for subscriptions, presence, locks, and notifications
+- `lib/websocket/ws-client.ts` - WebSocket client with auto-reconnect, exponential backoff, message queuing, ping/pong keepalive
+- `lib/websocket/ws-context.tsx` - React context providing WebSocket state and methods
+- `lib/websocket/ws-hooks.ts` - Hooks: `useProjectSubscription`, `useNodePresence`, `useNodeLock`, `useExecutionUpdates`, `useConnectionStatus`
+- `components/presence/presence-avatars.tsx` - Avatar stack showing users viewing/editing nodes
+- `components/lock/lock-indicator.tsx` - Lock badge, button, warning, and conflict dialog
+- `components/websocket/connection-status.tsx` - Connection indicator for header
+- 36 comprehensive tests covering connection, subscriptions, presence, locks
+
+**Phase 12 - Search (Cmd+K):**
+- `components/ui/command.tsx` - shadcn/ui Command component using cmdk
+- `hooks/use-search.ts` - Debounced search with React Query, recent items in localStorage
+- `components/search/search-command.tsx` - Command palette with Cmd+K shortcut, semantic search toggle
+- `components/search/search-context.tsx` - Context for controlling search dialog state
+- `components/search/search-result-item.tsx` - Rich result items with status badges
+- Integrated into Header with `SearchTrigger` button
+- 25 tests for search context, hooks, and components
+
+**Phase 13 - Notifications:**
+- `hooks/use-notifications.ts` - Notification state with localStorage persistence, WebSocket integration
+- `components/notifications/notification-bell.tsx` - Bell icon with unread badge
+- `components/notifications/notification-item.tsx` - Rich notification items with type icons
+- `components/notifications/notification-panel.tsx` - Popover panel with mark read/dismiss/clear actions
+- Added `NotificationMessage` type to WebSocket types
+- 22 tests for notification components and hooks
+
+**UI Bug Fix:**
+- Fixed detail panel header overlap in canvas view by adding `overflow-hidden` and `z-10` to container elements
+
+### Files Modified
+
+**New Files:**
+- `apps/web/src/lib/websocket/types.ts`
+- `apps/web/src/lib/websocket/ws-client.ts`
+- `apps/web/src/lib/websocket/ws-context.tsx`
+- `apps/web/src/lib/websocket/ws-hooks.ts`
+- `apps/web/src/lib/websocket/index.ts`
+- `apps/web/src/lib/websocket/__tests__/ws-client.test.ts`
+- `apps/web/src/lib/websocket/__tests__/ws-hooks.test.tsx`
+- `apps/web/src/components/presence/presence-avatars.tsx`
+- `apps/web/src/components/presence/index.ts`
+- `apps/web/src/components/lock/lock-indicator.tsx`
+- `apps/web/src/components/lock/index.ts`
+- `apps/web/src/components/websocket/connection-status.tsx`
+- `apps/web/src/components/websocket/index.ts`
+- `apps/web/src/components/ui/command.tsx`
+- `apps/web/src/hooks/use-search.ts`
+- `apps/web/src/hooks/__tests__/use-search.test.ts`
+- `apps/web/src/components/search/search-command.tsx`
+- `apps/web/src/components/search/search-context.tsx`
+- `apps/web/src/components/search/search-result-item.tsx`
+- `apps/web/src/components/search/__tests__/search.test.tsx`
+- `apps/web/src/components/search/index.ts`
+- `apps/web/src/hooks/use-notifications.ts`
+- `apps/web/src/hooks/__tests__/use-notifications.test.ts`
+- `apps/web/src/components/notifications/notification-bell.tsx`
+- `apps/web/src/components/notifications/notification-item.tsx`
+- `apps/web/src/components/notifications/notification-panel.tsx`
+- `apps/web/src/components/notifications/__tests__/notifications.test.tsx`
+- `apps/web/src/components/notifications/index.ts`
+
+**Modified Files:**
+- `apps/web/src/app/providers.tsx` - Added WebSocketWrapper
+- `apps/web/src/app/projects/[projectId]/page.tsx` - Integrated WebSocket hooks, presence, locks
+- `apps/web/src/components/node/node-detail-panel.tsx` - Added presence/lock props
+- `apps/web/src/components/layout/app-shell.tsx` - Added SearchProvider and SearchCommand
+- `apps/web/src/components/layout/header.tsx` - Added SearchTrigger and NotificationPanel
+- `apps/web/src/test/setup.ts` - Added MockWebSocket for testing
+- `apps/web/vitest.config.ts` - Updated test configuration
+
+**Dependencies Added:**
+- `cmdk` - Command palette
+- `date-fns` - Date formatting
+- `@testing-library/user-event` - Testing
+
+---
+
 ## [2026-01-31] V2 Phase 10: Agent Execution UI
 
 ### Summary

@@ -33,6 +33,8 @@ import { useAppStore } from '@/stores/app-store';
 import { toast } from 'sonner';
 import { useExecution } from '@/hooks/use-execution';
 import { HITLModal, HITLNotificationButton, ExecutionPanel } from '@/components/agent';
+import { ConnectionStatusDot } from '@/components/websocket';
+import { useProjectSubscription, useNodePresence, useNodeLock } from '@/lib/websocket';
 import type { Node } from '@glassbox/shared-types';
 
 // Mock data for development/demo
@@ -209,6 +211,33 @@ function ProjectContent() {
     isNodeExecuting,
   } = useExecution();
 
+  // WebSocket hooks for real-time updates
+  useProjectSubscription(projectId, {
+    onNodeCreated: (node) => {
+      toast.info(`New node created: ${node.title}`);
+      // React Query will handle cache invalidation
+    },
+    onNodeUpdated: (nodeId, changes) => {
+      // React Query will handle cache invalidation
+    },
+    onNodeDeleted: (nodeId) => {
+      if (selectedNodeId === nodeId) {
+        setSelectedNodeId('');
+      }
+    },
+  });
+
+  // Presence and lock for selected node
+  const { users: presenceUsers, updatePresence } = useNodePresence(selectedNodeId || undefined);
+  const { isLocked, lockHolder, isLockHeldByMe } = useNodeLock(selectedNodeId || undefined);
+
+  // Update presence when node is selected
+  React.useEffect(() => {
+    if (selectedNodeId) {
+      updatePresence('viewing');
+    }
+  }, [selectedNodeId, updatePresence]);
+
   // Delete mutation
   const deleteNode = useDeleteNode(nodeToDelete?.id || '');
 
@@ -355,13 +384,14 @@ function ProjectContent() {
       onCreateOrgClick={() => setShowCreateOrg(true)}
       onOrgSettingsClick={() => setShowOrgSettings(true)}
     >
-      <div className="flex h-screen">
+      <div className="flex h-screen overflow-hidden">
         {/* Main content area */}
         <div className="flex-1 flex flex-col min-w-0">
           <Header
             title={project?.name || 'Project'}
             actions={
               <div className="flex items-center gap-3">
+                <ConnectionStatusDot />
                 <HITLNotificationButton onClick={() => setShowHITLModal(true)} />
                 <ViewSwitcher
                   value={viewMode}
@@ -400,7 +430,7 @@ function ProjectContent() {
           )}
 
           {viewMode === 'canvas' && (
-            <div className="flex-1 relative">
+            <div className="flex-1 relative overflow-hidden">
               <CanvasProvider
                 onNodeSelect={handleSelectNode}
                 onNodeEdit={handleEditNode}
@@ -448,10 +478,14 @@ function ProjectContent() {
 
         {/* Detail panel */}
         {selectedNode && (
-          <div className="w-96 shrink-0 border-l">
+          <div className="w-96 shrink-0 border-l overflow-hidden z-10 bg-background">
             <NodeDetailPanel
               node={selectedNode}
               childNodes={childNodes}
+              presenceUsers={presenceUsers}
+              isLocked={isLocked}
+              isLockHeldByMe={isLockHeldByMe}
+              lockHolderEmail={lockHolder || undefined}
               onClose={handleCloseDetail}
               onEdit={() => handleEditNode(selectedNode)}
               onExecute={() => handleExecuteNode(selectedNode)}

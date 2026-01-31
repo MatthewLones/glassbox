@@ -12,11 +12,18 @@ import { NodeAuthorBadge } from './node-author-badge';
 import { NodeInputsList } from './node-inputs-list';
 import { NodeOutputsList } from './node-outputs-list';
 import { NodeEvidenceList, type EvidenceItem } from './node-evidence-list';
+import { PresenceAvatars } from '@/components/presence';
+import { LockIndicator } from '@/components/lock';
 import type { Node } from '@glassbox/shared-types';
+import type { PresenceUser } from '@/lib/websocket/types';
 
 interface NodeDetailPanelProps {
   node: Node;
   childNodes?: Node[];
+  presenceUsers?: PresenceUser[];
+  isLocked?: boolean;
+  isLockHeldByMe?: boolean;
+  lockHolderEmail?: string;
   onClose: () => void;
   onEdit?: () => void;
   onExecute?: () => void;
@@ -29,6 +36,10 @@ interface NodeDetailPanelProps {
 export function NodeDetailPanel({
   node,
   childNodes = [],
+  presenceUsers = [],
+  isLocked = false,
+  isLockHeldByMe = false,
+  lockHolderEmail,
   onClose,
   onEdit,
   onExecute,
@@ -107,10 +118,26 @@ export function NodeDetailPanel({
       {/* Header */}
       <div className="flex items-start justify-between p-4 border-b">
         <div className="flex-1 min-w-0 pr-4">
-          <h2 className="text-lg font-semibold truncate">{node.title}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold truncate flex-1">{node.title}</h2>
+            {isLocked && (
+              <LockIndicator
+                isLocked={isLocked}
+                isLockHeldByMe={isLockHeldByMe}
+                lockHolderEmail={lockHolderEmail}
+                size="sm"
+              />
+            )}
+          </div>
           <div className="flex items-center gap-2 mt-2">
             <NodeStatusBadge status={node.status} size="sm" />
             <NodeAuthorBadge authorType={node.authorType} size="sm" />
+            {presenceUsers.length > 0 && (
+              <>
+                <span className="text-muted-foreground">•</span>
+                <PresenceAvatars users={presenceUsers} size="sm" maxVisible={3} />
+              </>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
