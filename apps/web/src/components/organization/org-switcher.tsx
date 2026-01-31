@@ -17,6 +17,19 @@ import { useOrganizations } from '@/hooks/use-organizations';
 import { useAppStore } from '@/stores/app-store';
 import type { Organization } from '@glassbox/shared-types';
 
+// Mock data for development/demo
+const MOCK_ORGANIZATIONS: Organization[] = [
+  {
+    id: 'org-demo-123',
+    name: 'Demo Organization',
+    slug: 'demo-org',
+    settings: {},
+    eventSourcingLevel: 'audit',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
+];
+
 interface OrgSwitcherProps {
   onCreateClick?: () => void;
 }
@@ -25,7 +38,9 @@ export function OrgSwitcher({ onCreateClick }: OrgSwitcherProps) {
   const { data, isLoading } = useOrganizations();
   const { currentOrgId, setCurrentOrgId } = useAppStore();
 
-  const organizations = data?.data || [];
+  // Use mock data if no real data
+  const realOrgs = data?.data || [];
+  const organizations = realOrgs.length > 0 ? realOrgs : MOCK_ORGANIZATIONS;
   const currentOrg = organizations.find((org) => org.id === currentOrgId);
 
   // Auto-select first org if none selected
