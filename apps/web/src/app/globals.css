@@ -2,29 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
+@layer base {
+  :root {
+    /* Background and foreground */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Card - with slight blue tint for glass */
+    --card: 210 40% 98%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Primary - GlassBox sky blue */
+    --primary: 199 89% 48%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Secondary */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    /* Muted */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    /* Accent */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    /* Destructive */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Border and input */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+
+    /* Ring */
+    --ring: 199 89% 48%;
+
+    /* Border radius */
+    --radius: 0.5rem;
+
+    /* Glass effect variables */
+    --glass-bg: 255 255 255 / 0.8;
+    --glass-border: 255 255 255 / 0.2;
+    --glass-blur: 12px;
+  }
+
+  /* Light mode only for now - no dark mode variables */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 17, 24, 39;
-    --background-end-rgb: 17, 24, 39;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-  min-height: 100vh;
+/* Glass effect utilities */
+@layer components {
+  .glass {
+    background: rgba(var(--glass-bg));
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(var(--glass-border));
+  }
+
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  }
+
+  .glass-modal {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .glass-overlay {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
 }
 
 /* Custom scrollbar */
@@ -46,12 +130,9 @@ body {
   background: #9ca3af;
 }
 
-@media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-thumb {
-    background: #374151;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #4b5563;
+/* Smooth transitions for interactive elements */
+@layer utilities {
+  .transition-glass {
+    transition: background-color 0.2s ease, backdrop-filter 0.2s ease, box-shadow 0.2s ease;
   }
 }

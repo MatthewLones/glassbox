@@ -1,0 +1,1608 @@
+{
+ "Description": "GlassBox Compute Infrastructure",
+ "Resources": {
+  "ClusterEB0386A7": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": "glassbox-staging",
+    "ClusterSettings": [
+     {
+      "Name": "containerInsights",
+      "Value": "disabled"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/Cluster/Resource"
+   }
+  },
+  "ExecutionRole605A040B": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+       ]
+      ]
+     }
+    ],
+    "RoleName": "glassbox-staging-execution",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ExecutionRole/Resource"
+   }
+  },
+  "ExecutionRoleDefaultPolicyA5B92313": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:secretsmanager:us-east-1:846532307761:secret:glassbox/staging/llm-??????",
+        {
+         "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+        }
+       ]
+      },
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:ecr:us-east-1:846532307761:repository/glassbox-staging-api",
+        "arn:aws:ecr:us-east-1:846532307761:repository/glassbox-staging-worker"
+       ]
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ApiLogGroup1DEDFC07",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "WorkerLogGroup31FDBE4A",
+          "Arn"
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ExecutionRoleDefaultPolicyA5B92313",
+    "Roles": [
+     {
+      "Ref": "ExecutionRole605A040B"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "ApiTaskRole12FAD4A7": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "RoleName": "glassbox-staging-api-task",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ApiTaskRole/Resource"
+   }
+  },
+  "ApiTaskRoleDefaultPolicyBEF5D530": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "GlassBox-staging-Storage:ExportsOutputFnGetAttFilesBucket16450113Arn55CDC1C6"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Storage:ExportsOutputFnGetAttFilesBucket16450113Arn55CDC1C6"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:SendMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputFnGetAttAgentQueueFAC8FABDArn04EF5DA7"
+        },
+        {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputFnGetAttFileQueueD59508EEArn30672699"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ApiTaskRoleDefaultPolicyBEF5D530",
+    "Roles": [
+     {
+      "Ref": "ApiTaskRole12FAD4A7"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ApiTaskRole/DefaultPolicy/Resource"
+   }
+  },
+  "WorkerTaskRole013F226A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "RoleName": "glassbox-staging-worker-task",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/WorkerTaskRole/Resource"
+   }
+  },
+  "WorkerTaskRoleDefaultPolicy4DD5AEA2": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "GlassBox-staging-Storage:ExportsOutputFnGetAttFilesBucket16450113Arn55CDC1C6"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Storage:ExportsOutputFnGetAttFilesBucket16450113Arn55CDC1C6"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "sqs:ChangeMessageVisibility",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:ReceiveMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputFnGetAttAgentQueueFAC8FABDArn04EF5DA7"
+        },
+        {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputFnGetAttFileQueueD59508EEArn30672699"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "WorkerTaskRoleDefaultPolicy4DD5AEA2",
+    "Roles": [
+     {
+      "Ref": "WorkerTaskRole013F226A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/WorkerTaskRole/DefaultPolicy/Resource"
+   }
+  },
+  "ApiLogGroup1DEDFC07": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/ecs/glassbox-staging/api",
+    "RetentionInDays": 7,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ApiLogGroup/Resource"
+   }
+  },
+  "WorkerLogGroup31FDBE4A": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/ecs/glassbox-staging/worker",
+    "RetentionInDays": 7,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/WorkerLogGroup/Resource"
+   }
+  },
+  "ApiTaskDef37DBDBD0": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "GO_ENV",
+        "Value": "staging"
+       },
+       {
+        "Name": "ENVIRONMENT",
+        "Value": "staging"
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Storage:ExportsOutputRefFilesBucket164501139A977DFC"
+        }
+       },
+       {
+        "Name": "SQS_AGENT_QUEUE_URL",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputRefAgentQueueFAC8FABD09616C7A"
+        }
+       },
+       {
+        "Name": "SQS_FILE_QUEUE_URL",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputRefFileQueueD59508EEBD4263C6"
+        }
+       },
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Auth:ExportsOutputRefUserPool6BA7E5F296FD7236"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Auth:ExportsOutputRefUserPoolClient2F5918F753847A55"
+        }
+       },
+       {
+        "Name": "COGNITO_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "REDIS_URL",
+        "Value": {
+         "Fn::Join": [
+          "",
+          [
+           "redis://",
+           {
+            "Fn::ImportValue": "GlassBox-staging-Cache:ExportsOutputFnGetAttRedisClusterRedisEndpointAddress2C712DA2"
+           },
+           ":",
+           {
+            "Fn::ImportValue": "GlassBox-staging-Cache:ExportsOutputFnGetAttRedisClusterRedisEndpointPortD2710AFC"
+           }
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "PORT",
+        "Value": "8080"
+       },
+       {
+        "Name": "ALLOWED_ORIGINS",
+        "Value": "http://localhost:3000,http://localhost:5173"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget --no-verbose --tries=1 -O /dev/null http://localhost:8080/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 5,
+       "StartPeriod": 120,
+       "Timeout": 10
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "846532307761.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glassbox-staging-api:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "api",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "api",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ],
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":host::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":port::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":username::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":dbname::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": "arn:aws:secretsmanager:us-east-1:846532307761:secret:glassbox/staging/llm:jwtSecret::"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "ExecutionRole605A040B",
+      "Arn"
+     ]
+    },
+    "Family": "glassbox-staging-api",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "ApiTaskRole12FAD4A7",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ApiTaskDef/Resource"
+   }
+  },
+  "ALBAEE750D2": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Name": "glassbox-staging",
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputFnGetAttAlbSecurityGroup86A59E99GroupIdE3A37BC7"
+     }
+    ],
+    "Subnets": [
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCPublicSubnet1SubnetB4246D30D84F935B"
+     },
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCPublicSubnet2Subnet74179F3969CC10AD"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ],
+    "Type": "application"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ALB/Resource"
+   }
+  },
+  "ALBHttpListener04CE8CD0": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "ApiTargetGroup5723F19D"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "ALBAEE750D2"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ALB/HttpListener/Resource"
+   }
+  },
+  "ApiServiceC9037CF0": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "ClusterEB0386A7"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "DeploymentCircuitBreaker": {
+      "Enable": true,
+      "Rollback": true
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "api",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "ApiTargetGroup5723F19D"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputFnGetAttApiSecurityGroup4E5BB726GroupIdA239A589"
+       }
+      ],
+      "Subnets": [
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCPrivateSubnet1Subnet8BCA10E01F79A1B7"
+       },
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCPrivateSubnet2SubnetCFCDAA7AB22CF85D"
+       }
+      ]
+     }
+    },
+    "ServiceName": "glassbox-staging-api",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ],
+    "TaskDefinition": {
+     "Ref": "ApiTaskDef37DBDBD0"
+    }
+   },
+   "DependsOn": [
+    "ALBHttpListener04CE8CD0",
+    "ApiTaskRoleDefaultPolicyBEF5D530",
+    "ApiTaskRole12FAD4A7"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ApiService/Service"
+   }
+  },
+  "ApiTargetGroup5723F19D": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckIntervalSeconds": 30,
+    "HealthCheckPath": "/health",
+    "HealthCheckTimeoutSeconds": 10,
+    "HealthyThresholdCount": 2,
+    "Name": "glassbox-staging-api",
+    "Port": 8080,
+    "Protocol": "HTTP",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ],
+    "TargetGroupAttributes": [
+     {
+      "Key": "deregistration_delay.timeout_seconds",
+      "Value": "30"
+     },
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "UnhealthyThresholdCount": 5,
+    "VpcId": {
+     "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCB9E5F0B4BD23A326"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/ApiTargetGroup/Resource"
+   }
+  },
+  "WorkerTaskDef3CFCC8D9": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Command": [
+       "python",
+       "-m",
+       "agent.worker"
+      ],
+      "Environment": [
+       {
+        "Name": "GO_ENV",
+        "Value": "staging"
+       },
+       {
+        "Name": "ENVIRONMENT",
+        "Value": "staging"
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Storage:ExportsOutputRefFilesBucket164501139A977DFC"
+        }
+       },
+       {
+        "Name": "SQS_AGENT_QUEUE_URL",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputRefAgentQueueFAC8FABD09616C7A"
+        }
+       },
+       {
+        "Name": "SQS_FILE_QUEUE_URL",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputRefFileQueueD59508EEBD4263C6"
+        }
+       },
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Auth:ExportsOutputRefUserPool6BA7E5F296FD7236"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Auth:ExportsOutputRefUserPoolClient2F5918F753847A55"
+        }
+       },
+       {
+        "Name": "COGNITO_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "REDIS_URL",
+        "Value": {
+         "Fn::Join": [
+          "",
+          [
+           "redis://",
+           {
+            "Fn::ImportValue": "GlassBox-staging-Cache:ExportsOutputFnGetAttRedisClusterRedisEndpointAddress2C712DA2"
+           },
+           ":",
+           {
+            "Fn::ImportValue": "GlassBox-staging-Cache:ExportsOutputFnGetAttRedisClusterRedisEndpointPortD2710AFC"
+           }
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "PYTHONUNBUFFERED",
+        "Value": "1"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "846532307761.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glassbox-staging-worker:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "WorkerLogGroup31FDBE4A"
+        },
+        "awslogs-stream-prefix": "agent",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "agent-worker",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":host::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":port::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":username::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":dbname::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "ANTHROPIC_API_KEY",
+        "ValueFrom": "arn:aws:secretsmanager:us-east-1:846532307761:secret:glassbox/staging/llm:anthropicApiKey::"
+       },
+       {
+        "Name": "OPENAI_API_KEY",
+        "ValueFrom": "arn:aws:secretsmanager:us-east-1:846532307761:secret:glassbox/staging/llm:openaiApiKey::"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "ExecutionRole605A040B",
+      "Arn"
+     ]
+    },
+    "Family": "glassbox-staging-worker",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "WorkerTaskRole013F226A",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/WorkerTaskDef/Resource"
+   }
+  },
+  "AgentWorkerServiceDE58B9C3": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "ClusterEB0386A7"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "DeploymentCircuitBreaker": {
+      "Enable": true,
+      "Rollback": true
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "LaunchType": "FARGATE",
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputFnGetAttWorkerSecurityGroup5529CF0BGroupId178F84DF"
+       }
+      ],
+      "Subnets": [
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCPrivateSubnet1Subnet8BCA10E01F79A1B7"
+       },
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCPrivateSubnet2SubnetCFCDAA7AB22CF85D"
+       }
+      ]
+     }
+    },
+    "ServiceName": "glassbox-staging-agent-worker",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ],
+    "TaskDefinition": {
+     "Ref": "WorkerTaskDef3CFCC8D9"
+    }
+   },
+   "DependsOn": [
+    "WorkerTaskRoleDefaultPolicy4DD5AEA2",
+    "WorkerTaskRole013F226A"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/AgentWorkerService/Service"
+   }
+  },
+  "FileWorkerTaskDef2E1CFBA7": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Command": [
+       "python",
+       "-m",
+       "file_processor.worker"
+      ],
+      "Environment": [
+       {
+        "Name": "GO_ENV",
+        "Value": "staging"
+       },
+       {
+        "Name": "ENVIRONMENT",
+        "Value": "staging"
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Storage:ExportsOutputRefFilesBucket164501139A977DFC"
+        }
+       },
+       {
+        "Name": "SQS_AGENT_QUEUE_URL",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputRefAgentQueueFAC8FABD09616C7A"
+        }
+       },
+       {
+        "Name": "SQS_FILE_QUEUE_URL",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Messaging:ExportsOutputRefFileQueueD59508EEBD4263C6"
+        }
+       },
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Auth:ExportsOutputRefUserPool6BA7E5F296FD7236"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Fn::ImportValue": "GlassBox-staging-Auth:ExportsOutputRefUserPoolClient2F5918F753847A55"
+        }
+       },
+       {
+        "Name": "COGNITO_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "REDIS_URL",
+        "Value": {
+         "Fn::Join": [
+          "",
+          [
+           "redis://",
+           {
+            "Fn::ImportValue": "GlassBox-staging-Cache:ExportsOutputFnGetAttRedisClusterRedisEndpointAddress2C712DA2"
+           },
+           ":",
+           {
+            "Fn::ImportValue": "GlassBox-staging-Cache:ExportsOutputFnGetAttRedisClusterRedisEndpointPortD2710AFC"
+           }
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "PYTHONUNBUFFERED",
+        "Value": "1"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "846532307761.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glassbox-staging-worker:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "WorkerLogGroup31FDBE4A"
+        },
+        "awslogs-stream-prefix": "file",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "file-worker",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":host::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":port::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":username::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+           },
+           ":dbname::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "OPENAI_API_KEY",
+        "ValueFrom": "arn:aws:secretsmanager:us-east-1:846532307761:secret:glassbox/staging/llm:openaiApiKey::"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "ExecutionRole605A040B",
+      "Arn"
+     ]
+    },
+    "Family": "glassbox-staging-file-worker",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "WorkerTaskRole013F226A",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/FileWorkerTaskDef/Resource"
+   }
+  },
+  "FileWorkerService5860E915": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "ClusterEB0386A7"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "DeploymentCircuitBreaker": {
+      "Enable": true,
+      "Rollback": true
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "LaunchType": "FARGATE",
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputFnGetAttWorkerSecurityGroup5529CF0BGroupId178F84DF"
+       }
+      ],
+      "Subnets": [
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCPrivateSubnet1Subnet8BCA10E01F79A1B7"
+       },
+       {
+        "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCPrivateSubnet2SubnetCFCDAA7AB22CF85D"
+       }
+      ]
+     }
+    },
+    "ServiceName": "glassbox-staging-file-worker",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Compute"
+     }
+    ],
+    "TaskDefinition": {
+     "Ref": "FileWorkerTaskDef2E1CFBA7"
+    }
+   },
+   "DependsOn": [
+    "WorkerTaskRoleDefaultPolicy4DD5AEA2",
+    "WorkerTaskRole013F226A"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/FileWorkerService/Service"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Ry07DMBD8Fu6OQQHBmRaVSyVQ2jvaOttoG9cb2eugKsq/47xQ4LSzM7PWjJzr/PFZP9zBd8hMWWeWTro7CJhaJeqrQxN0t7UxCHq1PbsF7sBXIHiEUL/hmRwJsRsM/xl2AuTQr7j59oC+JYPD0Qx7hcbrAhsOJOxvGwioCK66K9iOxnF+siVzG9YJ9cpylWLuuXr3HJtBWXB60kIQMpahPIEFZ8hVba6716ZJxzAk2idtM2pTyT/72kepu5s9C17px1QM5TfDau17VWDg6Ke+H1GaKL1yXKK+hPs2f9Iv6RcugSjz0QldURfT/AG58x1nogEAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Compute/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "LoadBalancerDns": {
+   "Description": "Load Balancer DNS name",
+   "Value": {
+    "Fn::GetAtt": [
+     "ALBAEE750D2",
+     "DNSName"
+    ]
+   },
+   "Export": {
+    "Name": "staging-LoadBalancerDns"
+   }
+  },
+  "ApiRepositoryUri": {
+   "Description": "API ECR repository URI",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "846532307761.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/glassbox-staging-api"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "staging-ApiRepositoryUri"
+   }
+  },
+  "WorkerRepositoryUri": {
+   "Description": "Worker ECR repository URI",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "846532307761.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/glassbox-staging-worker"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "staging-WorkerRepositoryUri"
+   }
+  },
+  "ClusterName": {
+   "Description": "ECS Cluster name",
+   "Value": {
+    "Ref": "ClusterEB0386A7"
+   },
+   "Export": {
+    "Name": "staging-ClusterName"
+   }
+  },
+  "ExportsOutputRefClusterEB0386A796A0E3FE": {
+   "Value": {
+    "Ref": "ClusterEB0386A7"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+   }
+  },
+  "ExportsOutputFnGetAttApiServiceC9037CF0Name3E44BA2D": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ApiServiceC9037CF0",
+     "Name"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Compute:ExportsOutputFnGetAttApiServiceC9037CF0Name3E44BA2D"
+   }
+  },
+  "ExportsOutputFnGetAttAgentWorkerServiceDE58B9C3Name3E3CF868": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AgentWorkerServiceDE58B9C3",
+     "Name"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Compute:ExportsOutputFnGetAttAgentWorkerServiceDE58B9C3Name3E3CF868"
+   }
+  },
+  "ExportsOutputFnGetAttFileWorkerService5860E915Name5A307F02": {
+   "Value": {
+    "Fn::GetAtt": [
+     "FileWorkerService5860E915",
+     "Name"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Compute:ExportsOutputFnGetAttFileWorkerService5860E915Name5A307F02"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

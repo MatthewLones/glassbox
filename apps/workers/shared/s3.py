@@ -21,13 +21,21 @@ class S3Client:
         self.bucket = bucket or self._settings.s3_bucket
 
     def _get_session_config(self) -> dict:
-        """Get boto3 session configuration."""
-        return {
+        """Get boto3 session configuration.
+
+        Only passes credentials if explicitly set (for local development with LocalStack).
+        In AWS, credentials are automatically picked up from IAM role.
+        """
+        config = {
             "region_name": self._settings.aws_region,
-            "endpoint_url": self._settings.aws_endpoint_url,
-            "aws_access_key_id": self._settings.aws_access_key_id or "test",
-            "aws_secret_access_key": self._settings.aws_secret_access_key or "test",
         }
+        if self._settings.aws_endpoint_url:
+            config["endpoint_url"] = self._settings.aws_endpoint_url
+        if self._settings.aws_access_key_id:
+            config["aws_access_key_id"] = self._settings.aws_access_key_id
+        if self._settings.aws_secret_access_key:
+            config["aws_secret_access_key"] = self._settings.aws_secret_access_key
+        return config
 
     async def upload(
         self,

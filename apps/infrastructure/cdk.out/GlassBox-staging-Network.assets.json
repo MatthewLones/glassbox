@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "e757fc97a5233b547fc481748b319c3492ff3656dd1e2c0c2d7121c303e8cb7f": {
+      "displayName": "GlassBox-staging-Network Template",
+      "source": {
+        "path": "GlassBox-staging-Network.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "846532307761-us-east-1-111795e2": {
+          "bucketName": "cdk-hnb659fds-assets-846532307761-us-east-1",
+          "objectKey": "e757fc97a5233b547fc481748b319c3492ff3656dd1e2c0c2d7121c303e8cb7f.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-file-publishing-role-846532307761-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

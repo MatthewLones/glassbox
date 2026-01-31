@@ -1,0 +1,453 @@
+{
+ "Description": "GlassBox Monitoring Infrastructure",
+ "Resources": {
+  "AlarmTopicD01E77F9": {
+   "Type": "AWS::SNS::Topic",
+   "Properties": {
+    "DisplayName": "GlassBox staging Alarms",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Monitoring"
+     }
+    ],
+    "TopicName": "glassbox-staging-alarms"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Monitoring/AlarmTopic/Resource"
+   }
+  },
+  "ApiCpuAlarm8FA6A548": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "AlarmTopicD01E77F9"
+     }
+    ],
+    "AlarmDescription": "API service CPU utilization is high",
+    "AlarmName": "glassbox-staging-api-cpu",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "Dimensions": [
+     {
+      "Name": "ClusterName",
+      "Value": {
+       "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+      }
+     },
+     {
+      "Name": "ServiceName",
+      "Value": {
+       "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputFnGetAttApiServiceC9037CF0Name3E44BA2D"
+      }
+     }
+    ],
+    "EvaluationPeriods": 3,
+    "MetricName": "CPUUtilization",
+    "Namespace": "AWS/ECS",
+    "Period": 300,
+    "Statistic": "Average",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Monitoring"
+     }
+    ],
+    "Threshold": 80,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Monitoring/ApiCpuAlarm/Resource"
+   }
+  },
+  "ApiMemoryAlarm149B8177": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "AlarmTopicD01E77F9"
+     }
+    ],
+    "AlarmDescription": "API service memory utilization is high",
+    "AlarmName": "glassbox-staging-api-memory",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "Dimensions": [
+     {
+      "Name": "ClusterName",
+      "Value": {
+       "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+      }
+     },
+     {
+      "Name": "ServiceName",
+      "Value": {
+       "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputFnGetAttApiServiceC9037CF0Name3E44BA2D"
+      }
+     }
+    ],
+    "EvaluationPeriods": 3,
+    "MetricName": "MemoryUtilization",
+    "Namespace": "AWS/ECS",
+    "Period": 300,
+    "Statistic": "Average",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Monitoring"
+     }
+    ],
+    "Threshold": 80,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Monitoring/ApiMemoryAlarm/Resource"
+   }
+  },
+  "DbCpuAlarmF24BD102": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "AlarmTopicD01E77F9"
+     }
+    ],
+    "AlarmDescription": "Database CPU utilization is high",
+    "AlarmName": "glassbox-staging-db-cpu",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "Dimensions": [
+     {
+      "Name": "DBInstanceIdentifier",
+      "Value": "glassbox-staging"
+     }
+    ],
+    "EvaluationPeriods": 3,
+    "MetricName": "CPUUtilization",
+    "Namespace": "AWS/RDS",
+    "Period": 300,
+    "Statistic": "Average",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Monitoring"
+     }
+    ],
+    "Threshold": 80,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Monitoring/DbCpuAlarm/Resource"
+   }
+  },
+  "DbConnectionsAlarm7767BF57": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "AlarmTopicD01E77F9"
+     }
+    ],
+    "AlarmDescription": "Database connections are high",
+    "AlarmName": "glassbox-staging-db-connections",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "Dimensions": [
+     {
+      "Name": "DBInstanceIdentifier",
+      "Value": "glassbox-staging"
+     }
+    ],
+    "EvaluationPeriods": 2,
+    "MetricName": "DatabaseConnections",
+    "Namespace": "AWS/RDS",
+    "Period": 300,
+    "Statistic": "Average",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Monitoring"
+     }
+    ],
+    "Threshold": 80,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Monitoring/DbConnectionsAlarm/Resource"
+   }
+  },
+  "DbStorageAlarm004E7006": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "AlarmTopicD01E77F9"
+     }
+    ],
+    "AlarmDescription": "Database free storage is low",
+    "AlarmName": "glassbox-staging-db-storage",
+    "ComparisonOperator": "LessThanThreshold",
+    "Dimensions": [
+     {
+      "Name": "DBInstanceIdentifier",
+      "Value": "glassbox-staging"
+     }
+    ],
+    "EvaluationPeriods": 2,
+    "MetricName": "FreeStorageSpace",
+    "Namespace": "AWS/RDS",
+    "Period": 300,
+    "Statistic": "Average",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Monitoring"
+     }
+    ],
+    "Threshold": 10737418240,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Monitoring/DbStorageAlarm/Resource"
+   }
+  },
+  "Dashboard9E4231ED": {
+   "Type": "AWS::CloudWatch::Dashboard",
+   "Properties": {
+    "DashboardBody": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"widgets\":[{\"type\":\"text\",\"width\":24,\"height\":1,\"x\":0,\"y\":0,\"properties\":{\"markdown\":\"# GlassBox staging - API Services\"}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":0,\"y\":1,\"properties\":{\"view\":\"timeSeries\",\"title\":\"API CPU Utilization\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/ECS\",\"CPUUtilization\",\"ClusterName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+       },
+       "\",\"ServiceName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputFnGetAttApiServiceC9037CF0Name3E44BA2D"
+       },
+       "\"]],\"yAxis\":{}}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":8,\"y\":1,\"properties\":{\"view\":\"timeSeries\",\"title\":\"API Memory Utilization\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/ECS\",\"MemoryUtilization\",\"ClusterName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+       },
+       "\",\"ServiceName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputFnGetAttApiServiceC9037CF0Name3E44BA2D"
+       },
+       "\"]],\"yAxis\":{}}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":16,\"y\":1,\"properties\":{\"view\":\"timeSeries\",\"title\":\"API Task Count\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/ECS\",\"RunningTaskCount\",\"ClusterName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+       },
+       "\",\"ServiceName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputFnGetAttApiServiceC9037CF0Name3E44BA2D"
+       },
+       "\",{\"period\":60}]],\"yAxis\":{}}},{\"type\":\"text\",\"width\":24,\"height\":1,\"x\":0,\"y\":7,\"properties\":{\"markdown\":\"# GlassBox staging - Worker Services\"}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":0,\"y\":8,\"properties\":{\"view\":\"timeSeries\",\"title\":\"Agent Worker CPU\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/ECS\",\"CPUUtilization\",\"ClusterName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+       },
+       "\",\"ServiceName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputFnGetAttAgentWorkerServiceDE58B9C3Name3E3CF868"
+       },
+       "\"]],\"yAxis\":{}}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":8,\"y\":8,\"properties\":{\"view\":\"timeSeries\",\"title\":\"Agent Worker Memory\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/ECS\",\"MemoryUtilization\",\"ClusterName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+       },
+       "\",\"ServiceName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputFnGetAttAgentWorkerServiceDE58B9C3Name3E3CF868"
+       },
+       "\"]],\"yAxis\":{}}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":16,\"y\":8,\"properties\":{\"view\":\"timeSeries\",\"title\":\"File Worker CPU\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/ECS\",\"CPUUtilization\",\"ClusterName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputRefClusterEB0386A796A0E3FE"
+       },
+       "\",\"ServiceName\",\"",
+       {
+        "Fn::ImportValue": "GlassBox-staging-Compute:ExportsOutputFnGetAttFileWorkerService5860E915Name5A307F02"
+       },
+       "\"]],\"yAxis\":{}}},{\"type\":\"text\",\"width\":24,\"height\":1,\"x\":0,\"y\":14,\"properties\":{\"markdown\":\"# GlassBox staging - Database\"}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":0,\"y\":15,\"properties\":{\"view\":\"timeSeries\",\"title\":\"Database CPU\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/RDS\",\"CPUUtilization\",\"DBInstanceIdentifier\",\"glassbox-staging\",{\"period\":60}]],\"yAxis\":{}}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":8,\"y\":15,\"properties\":{\"view\":\"timeSeries\",\"title\":\"Database Connections\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/RDS\",\"DatabaseConnections\",\"DBInstanceIdentifier\",\"glassbox-staging\",{\"period\":60}]],\"yAxis\":{}}},{\"type\":\"metric\",\"width\":8,\"height\":6,\"x\":16,\"y\":15,\"properties\":{\"view\":\"timeSeries\",\"title\":\"Database Free Storage\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/RDS\",\"FreeStorageSpace\",\"DBInstanceIdentifier\",\"glassbox-staging\"]],\"yAxis\":{}}}]}"
+      ]
+     ]
+    },
+    "DashboardName": "glassbox-staging"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Monitoring/Dashboard/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2NwQ7CIBBEv8U7rAaNno3eTdS72S41paXQsGAPhH+32MTTvHlzGAVqf4TdBmeWpAdpTQP5EZEGsahXZseQn34yJC5v94MiyPqkZ4zUQT5bDGPdVrgid43HoKv6l1JqvaU4pViE87qFnrcfdYDT8t2zMTIkF83Ywn3NL6WlmCeYAAAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Monitoring/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "AlarmTopicArn": {
+   "Description": "Alarm SNS topic ARN",
+   "Value": {
+    "Ref": "AlarmTopicD01E77F9"
+   },
+   "Export": {
+    "Name": "staging-AlarmTopicArn"
+   }
+  },
+  "DashboardUrl": {
+   "Description": "CloudWatch Dashboard URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=",
+      {
+       "Ref": "Dashboard9E4231ED"
+      }
+     ]
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

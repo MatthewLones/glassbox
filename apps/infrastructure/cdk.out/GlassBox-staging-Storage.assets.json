@@ -1,0 +1,36 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6": {
+      "displayName": "GlassBox-staging-Storage/Custom::S3AutoDeleteObjectsCustomResourceProvider Code",
+      "source": {
+        "path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "846532307761-us-east-1-56786564": {
+          "bucketName": "cdk-hnb659fds-assets-846532307761-us-east-1",
+          "objectKey": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-file-publishing-role-846532307761-us-east-1"
+        }
+      }
+    },
+    "e8c5fc16095261bd7c24cb2782432572be92caaf857c21c497b6cfc3f09e2015": {
+      "displayName": "GlassBox-staging-Storage Template",
+      "source": {
+        "path": "GlassBox-staging-Storage.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "846532307761-us-east-1-f4ff1d87": {
+          "bucketName": "cdk-hnb659fds-assets-846532307761-us-east-1",
+          "objectKey": "e8c5fc16095261bd7c24cb2782432572be92caaf857c21c497b6cfc3f09e2015.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-file-publishing-role-846532307761-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

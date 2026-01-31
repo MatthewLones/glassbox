@@ -1,0 +1,177 @@
+{
+ "Description": "GlassBox Cache Infrastructure",
+ "Resources": {
+  "SubnetGroup": {
+   "Type": "AWS::ElastiCache::SubnetGroup",
+   "Properties": {
+    "CacheSubnetGroupName": "glassbox-staging-cache-subnets",
+    "Description": "Subnet group for GlassBox Redis cache",
+    "SubnetIds": [
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCIsolatedSubnet1SubnetEBD00FC6298E81EF"
+     },
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCIsolatedSubnet2Subnet4B1C8CAAD8B83B81"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Cache"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Cache/SubnetGroup"
+   }
+  },
+  "RedisCluster": {
+   "Type": "AWS::ElastiCache::CacheCluster",
+   "Properties": {
+    "AutoMinorVersionUpgrade": true,
+    "CacheNodeType": "cache.t4g.micro",
+    "CacheSubnetGroupName": {
+     "Ref": "SubnetGroup"
+    },
+    "ClusterName": "glassbox-staging",
+    "Engine": "redis",
+    "EngineVersion": "7.1",
+    "NumCacheNodes": 1,
+    "Port": 6379,
+    "SnapshotRetentionLimit": 7,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Cache"
+     }
+    ],
+    "VpcSecurityGroupIds": [
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputFnGetAttCacheSecurityGroupC6A3ACCFGroupId492AA7D3"
+     }
+    ]
+   },
+   "DependsOn": [
+    "SubnetGroup"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Cache/RedisCluster"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzI20zNQTCwv1k1OydbNyUzSqw4uSUzO1gEKxafmJBaXZCYnJmek6lU7p+UFlyblpZa4F+WXFugAuc4gCeec0uKS1KJakIB/aUlBaUmtTl5+SqpeVrF+mZGJnjnQ+KzizEzdotK8kszcVL0gCA0A+7N7V3sAAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Cache/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "RedisEndpoint": {
+   "Description": "Redis endpoint",
+   "Value": {
+    "Fn::GetAtt": [
+     "RedisCluster",
+     "RedisEndpoint.Address"
+    ]
+   },
+   "Export": {
+    "Name": "staging-RedisEndpoint"
+   }
+  },
+  "RedisPort": {
+   "Description": "Redis port",
+   "Value": {
+    "Fn::GetAtt": [
+     "RedisCluster",
+     "RedisEndpoint.Port"
+    ]
+   },
+   "Export": {
+    "Name": "staging-RedisPort"
+   }
+  },
+  "ExportsOutputFnGetAttRedisClusterRedisEndpointAddress2C712DA2": {
+   "Value": {
+    "Fn::GetAtt": [
+     "RedisCluster",
+     "RedisEndpoint.Address"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Cache:ExportsOutputFnGetAttRedisClusterRedisEndpointAddress2C712DA2"
+   }
+  },
+  "ExportsOutputFnGetAttRedisClusterRedisEndpointPortD2710AFC": {
+   "Value": {
+    "Fn::GetAtt": [
+     "RedisCluster",
+     "RedisEndpoint.Port"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Cache:ExportsOutputFnGetAttRedisClusterRedisEndpointPortD2710AFC"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

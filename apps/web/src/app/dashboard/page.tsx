@@ -1,80 +1,139 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import * as React from 'react';
+import { Plus, Settings } from 'lucide-react';
+import { AppShell } from '@/components/layout/app-shell';
+import { Header } from '@/components/layout/header';
+import { Button } from '@/components/ui/button';
+import { ProjectList } from '@/components/project/project-list';
+import { CreateProjectDialog } from '@/components/project/create-project-dialog';
+import { ProjectSettingsDialog } from '@/components/project/project-settings-dialog';
+import { CreateOrgDialog } from '@/components/organization/create-org-dialog';
+import { OrgSettingsDialog } from '@/components/organization/org-settings-dialog';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { useProjects, useDeleteProject } from '@/hooks/use-projects';
+import { useAppStore } from '@/stores/app-store';
+import { toast } from 'sonner';
+import type { Project } from '@glassbox/shared-types';
 
-export default function DashboardPage() {
-  const [projects] = useState([
-    { id: '1', name: 'Q4 Planning', nodesCount: 12, updatedAt: '2024-01-15' },
-    { id: '2', name: 'Product Launch', nodesCount: 8, updatedAt: '2024-01-14' },
-  ]);
+function DashboardContent() {
+  const { currentOrgId } = useAppStore();
+  const { data, isLoading } = useProjects(currentOrgId);
+  const projects = data?.data || [];
+
+  // Dialog states
+  const [showCreateProject, setShowCreateProject] = React.useState(false);
+  const [showCreateOrg, setShowCreateOrg] = React.useState(false);
+  const [showOrgSettings, setShowOrgSettings] = React.useState(false);
+  const [selectedProject, setSelectedProject] = React.useState<Project | null>(null);
+  const [projectToDelete, setProjectToDelete] = React.useState<Project | null>(null);
+
+  // Delete mutation
+  const deleteProject = useDeleteProject(projectToDelete?.id || '');
+
+  async function handleDeleteProject() {
+    if (!projectToDelete) return;
+    try {
+      await deleteProject.mutateAsync();
+      toast.success('Project deleted');
+      setProjectToDelete(null);
+    } catch (error) {
+      toast.error('Failed to delete project');
+      console.error(error);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Dashboard
-            </h1>
-            <button className="rounded-lg bg-primary-600 px-4 py-2 text-white text-sm font-medium hover:bg-primary-700 transition-colors">
-              New Project
-            </button>
-          </div>
-        </div>
-      </header>
+    <AppShell
+      onCreateOrgClick={() => setShowCreateOrg(true)}
+      onOrgSettingsClick={() => setShowOrgSettings(true)}
+    >
+      <Header
+        title="Dashboard"
+        actions={
+          <Button onClick={() => setShowCreateProject(true)} disabled={!currentOrgId}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Project
+          </Button>
+        }
+      />
 
-      {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Total Nodes</p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">20</p>
+      <div className="p-6">
+        {!currentOrgId ? (
+          <div className="text-center py-12">
+            <h2 className="text-lg font-semibold mb-2">No organization selected</h2>
+            <p className="text-muted-foreground mb-4">
+              Create or select an organization to view projects.
+            </p>
+            <Button onClick={() => setShowCreateOrg(true)}>
+              Create organization
+            </Button>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Active Agents</p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">3</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Completed Today</p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">5</p>
-          </div>
-        </div>
+        ) : (
+          <>
+            {/* Projects section */}
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-4">Projects</h2>
+              <ProjectList
+                projects={projects}
+                isLoading={isLoading}
+                onCreateClick={() => setShowCreateProject(true)}
+                onSettingsClick={(project) => setSelectedProject(project)}
+                onDeleteClick={(project) => setProjectToDelete(project)}
+              />
+            </div>
+          </>
+        )}
+      </div>
 
-        {/* Projects */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Recent Projects
-            </h2>
-          </div>
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {projects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/projects/${project.id}`}
-                className="block px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">
-                      {project.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {project.nodesCount} nodes
-                    </p>
-                  </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {project.updatedAt}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </main>
-    </div>
+      {/* Dialogs */}
+      {currentOrgId && (
+        <CreateProjectDialog
+          orgId={currentOrgId}
+          open={showCreateProject}
+          onOpenChange={setShowCreateProject}
+        />
+      )}
+
+      <CreateOrgDialog
+        open={showCreateOrg}
+        onOpenChange={setShowCreateOrg}
+      />
+
+      {currentOrgId && (
+        <OrgSettingsDialog
+          orgId={currentOrgId}
+          open={showOrgSettings}
+          onOpenChange={setShowOrgSettings}
+        />
+      )}
+
+      {selectedProject && (
+        <ProjectSettingsDialog
+          projectId={selectedProject.id}
+          open={!!selectedProject}
+          onOpenChange={(open) => !open && setSelectedProject(null)}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!projectToDelete}
+        onOpenChange={(open) => !open && setProjectToDelete(null)}
+        title="Delete project?"
+        description={`This will permanently delete "${projectToDelete?.name}" and all its nodes and files. This action cannot be undone.`}
+        confirmLabel="Delete project"
+        variant="destructive"
+        onConfirm={handleDeleteProject}
+      />
+    </AppShell>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 }

@@ -1,0 +1,25 @@
+# Environment files - should not be in production images
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+dist/
+build/
+
+# OS files
+.DS_Store
+
+# Test files
+*.test.go
+*_test.go

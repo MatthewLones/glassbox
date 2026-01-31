@@ -1,0 +1,1281 @@
+{
+ "Description": "GlassBox Network Infrastructure",
+ "Resources": {
+  "VPCB9E5F0B4": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "glassbox-staging-vpc"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/Resource"
+   }
+  },
+  "VPCPublicSubnet1SubnetB4246D30": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PublicSubnet1"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet1/Subnet"
+   }
+  },
+  "VPCPublicSubnet1RouteTableFEE4B781": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PublicSubnet1"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet1/RouteTable"
+   }
+  },
+  "VPCPublicSubnet1RouteTableAssociation0B0896DC": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPCPublicSubnet1RouteTableFEE4B781"
+    },
+    "SubnetId": {
+     "Ref": "VPCPublicSubnet1SubnetB4246D30"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "VPCPublicSubnet1DefaultRoute91CEF279": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "VPCIGWB7E252D3"
+    },
+    "RouteTableId": {
+     "Ref": "VPCPublicSubnet1RouteTableFEE4B781"
+    }
+   },
+   "DependsOn": [
+    "VPCVPCGW99B986DC"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "VPCPublicSubnet1EIP6AD938E8": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PublicSubnet1"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet1/EIP"
+   }
+  },
+  "VPCPublicSubnet1NATGatewayE0556630": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "VPCPublicSubnet1EIP6AD938E8",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "VPCPublicSubnet1SubnetB4246D30"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PublicSubnet1"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VPCPublicSubnet1DefaultRoute91CEF279",
+    "VPCPublicSubnet1RouteTableAssociation0B0896DC"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet1/NATGateway"
+   }
+  },
+  "VPCPublicSubnet2Subnet74179F39": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PublicSubnet2"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet2/Subnet"
+   }
+  },
+  "VPCPublicSubnet2RouteTable6F1A15F1": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PublicSubnet2"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet2/RouteTable"
+   }
+  },
+  "VPCPublicSubnet2RouteTableAssociation5A808732": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPCPublicSubnet2RouteTable6F1A15F1"
+    },
+    "SubnetId": {
+     "Ref": "VPCPublicSubnet2Subnet74179F39"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "VPCPublicSubnet2DefaultRouteB7481BBA": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "VPCIGWB7E252D3"
+    },
+    "RouteTableId": {
+     "Ref": "VPCPublicSubnet2RouteTable6F1A15F1"
+    }
+   },
+   "DependsOn": [
+    "VPCVPCGW99B986DC"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "VPCPrivateSubnet1Subnet8BCA10E0": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.2.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PrivateSubnet1"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PrivateSubnet1/Subnet"
+   }
+  },
+  "VPCPrivateSubnet1RouteTableBE8A6027": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PrivateSubnet1"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PrivateSubnet1/RouteTable"
+   }
+  },
+  "VPCPrivateSubnet1RouteTableAssociation347902D1": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPCPrivateSubnet1RouteTableBE8A6027"
+    },
+    "SubnetId": {
+     "Ref": "VPCPrivateSubnet1Subnet8BCA10E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PrivateSubnet1/RouteTableAssociation"
+   }
+  },
+  "VPCPrivateSubnet1DefaultRouteAE1D6490": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "VPCPublicSubnet1NATGatewayE0556630"
+    },
+    "RouteTableId": {
+     "Ref": "VPCPrivateSubnet1RouteTableBE8A6027"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PrivateSubnet1/DefaultRoute"
+   }
+  },
+  "VPCPrivateSubnet2SubnetCFCDAA7A": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.3.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PrivateSubnet2"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PrivateSubnet2/Subnet"
+   }
+  },
+  "VPCPrivateSubnet2RouteTable0A19E10E": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/PrivateSubnet2"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PrivateSubnet2/RouteTable"
+   }
+  },
+  "VPCPrivateSubnet2RouteTableAssociation0C73D413": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPCPrivateSubnet2RouteTable0A19E10E"
+    },
+    "SubnetId": {
+     "Ref": "VPCPrivateSubnet2SubnetCFCDAA7A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PrivateSubnet2/RouteTableAssociation"
+   }
+  },
+  "VPCPrivateSubnet2DefaultRouteF4F5CFD2": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "VPCPublicSubnet1NATGatewayE0556630"
+    },
+    "RouteTableId": {
+     "Ref": "VPCPrivateSubnet2RouteTable0A19E10E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/PrivateSubnet2/DefaultRoute"
+   }
+  },
+  "VPCIsolatedSubnet1SubnetEBD00FC6": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.4.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/IsolatedSubnet1"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/IsolatedSubnet1/Subnet"
+   }
+  },
+  "VPCIsolatedSubnet1RouteTableEB156210": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/IsolatedSubnet1"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/IsolatedSubnet1/RouteTable"
+   }
+  },
+  "VPCIsolatedSubnet1RouteTableAssociationA2D18F7C": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPCIsolatedSubnet1RouteTableEB156210"
+    },
+    "SubnetId": {
+     "Ref": "VPCIsolatedSubnet1SubnetEBD00FC6"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/IsolatedSubnet1/RouteTableAssociation"
+   }
+  },
+  "VPCIsolatedSubnet2Subnet4B1C8CAA": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.5.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/IsolatedSubnet2"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/IsolatedSubnet2/Subnet"
+   }
+  },
+  "VPCIsolatedSubnet2RouteTable9B4F78DC": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlassBox-staging-Network/VPC/IsolatedSubnet2"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/IsolatedSubnet2/RouteTable"
+   }
+  },
+  "VPCIsolatedSubnet2RouteTableAssociation7BF8E0EB": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VPCIsolatedSubnet2RouteTable9B4F78DC"
+    },
+    "SubnetId": {
+     "Ref": "VPCIsolatedSubnet2Subnet4B1C8CAA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/IsolatedSubnet2/RouteTableAssociation"
+   }
+  },
+  "VPCIGWB7E252D3": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Name",
+      "Value": "glassbox-staging-vpc"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/IGW"
+   }
+  },
+  "VPCVPCGW99B986DC": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "VPCIGWB7E252D3"
+    },
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/VPC/VPCGW"
+   }
+  },
+  "AlbSecurityGroup86A59E99": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for GlassBox ALB",
+    "GroupName": "glassbox-staging-alb-sg",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow HTTP traffic",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     },
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow HTTPS traffic",
+      "FromPort": 443,
+      "IpProtocol": "tcp",
+      "ToPort": 443
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/AlbSecurityGroup/Resource"
+   }
+  },
+  "AlbSecurityGrouptoGlassBoxstagingNetworkApiSecurityGroupD8174F548080906E3D79": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Allow outbound to API",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ApiSecurityGroup4E5BB726",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "AlbSecurityGroup86A59E99",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/AlbSecurityGroup/to GlassBoxstagingNetworkApiSecurityGroupD8174F54:8080"
+   }
+  },
+  "ApiSecurityGroup4E5BB726": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for GlassBox API services",
+    "GroupName": "glassbox-staging-api-sg",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/ApiSecurityGroup/Resource"
+   }
+  },
+  "ApiSecurityGroupfromGlassBoxstagingNetworkAlbSecurityGroup39DD91348080EAFFBED4": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow traffic from ALB",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ApiSecurityGroup4E5BB726",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "AlbSecurityGroup86A59E99",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/ApiSecurityGroup/from GlassBoxstagingNetworkAlbSecurityGroup39DD9134:8080"
+   }
+  },
+  "WorkerSecurityGroup5529CF0B": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for GlassBox worker services",
+    "GroupName": "glassbox-staging-worker-sg",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/WorkerSecurityGroup/Resource"
+   }
+  },
+  "DatabaseSecurityGroup7319C0F6": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for GlassBox database",
+    "GroupName": "glassbox-staging-db-sg",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "255.255.255.255/32",
+      "Description": "Disallow all traffic",
+      "FromPort": 252,
+      "IpProtocol": "icmp",
+      "ToPort": 86
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/DatabaseSecurityGroup/Resource"
+   }
+  },
+  "DatabaseSecurityGroupfromGlassBoxstagingNetworkApiSecurityGroupD8174F54543261B57666": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow PostgreSQL from API",
+    "FromPort": 5432,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "DatabaseSecurityGroup7319C0F6",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ApiSecurityGroup4E5BB726",
+      "GroupId"
+     ]
+    },
+    "ToPort": 5432
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/DatabaseSecurityGroup/from GlassBoxstagingNetworkApiSecurityGroupD8174F54:5432"
+   }
+  },
+  "DatabaseSecurityGroupfromGlassBoxstagingNetworkWorkerSecurityGroup18AD6DE25432F09A6D79": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow PostgreSQL from Workers",
+    "FromPort": 5432,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "DatabaseSecurityGroup7319C0F6",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "WorkerSecurityGroup5529CF0B",
+      "GroupId"
+     ]
+    },
+    "ToPort": 5432
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/DatabaseSecurityGroup/from GlassBoxstagingNetworkWorkerSecurityGroup18AD6DE2:5432"
+   }
+  },
+  "CacheSecurityGroupC6A3ACCF": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for GlassBox cache",
+    "GroupName": "glassbox-staging-cache-sg",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "255.255.255.255/32",
+      "Description": "Disallow all traffic",
+      "FromPort": 252,
+      "IpProtocol": "icmp",
+      "ToPort": 86
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Network"
+     }
+    ],
+    "VpcId": {
+     "Ref": "VPCB9E5F0B4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/CacheSecurityGroup/Resource"
+   }
+  },
+  "CacheSecurityGroupfromGlassBoxstagingNetworkApiSecurityGroupD8174F5463791C9496A3": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow Redis from API",
+    "FromPort": 6379,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "CacheSecurityGroupC6A3ACCF",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ApiSecurityGroup4E5BB726",
+      "GroupId"
+     ]
+    },
+    "ToPort": 6379
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/CacheSecurityGroup/from GlassBoxstagingNetworkApiSecurityGroupD8174F54:6379"
+   }
+  },
+  "CacheSecurityGroupfromGlassBoxstagingNetworkWorkerSecurityGroup18AD6DE26379BA674A18": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow Redis from Workers",
+    "FromPort": 6379,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "CacheSecurityGroupC6A3ACCF",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "WorkerSecurityGroup5529CF0B",
+      "GroupId"
+     ]
+    },
+    "ToPort": 6379
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/CacheSecurityGroup/from GlassBoxstagingNetworkWorkerSecurityGroup18AD6DE2:6379"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/32QTQvCMAyGf4v3rsoUPYuI7KJjE6/S1aiZsx1tooj43+3mxw6Cpzx5eAkviWU8HMtBT119pHenqMJC3nNS+iSC2oKO5X1TazHbm006EykXFeqcCwPUuI4yywRrVVTQ+c5NvbcaFaE133AD8yRtxlLRQhFc1U2kDi8Bu8OJIXCBP4FXk/c2pVD1eAZDIgfNDum2cJbrtsNfMT848P5HJ6b1D5GBt+x023LFVDM9hLE7kKXvX+KRnISnlR4xcmwIzyCz13wCF+jot1EBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Network/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "VpcId": {
+   "Description": "VPC ID",
+   "Value": {
+    "Ref": "VPCB9E5F0B4"
+   },
+   "Export": {
+    "Name": "staging-VpcId"
+   }
+  },
+  "ExportsOutputRefVPCIsolatedSubnet1SubnetEBD00FC6298E81EF": {
+   "Value": {
+    "Ref": "VPCIsolatedSubnet1SubnetEBD00FC6"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputRefVPCIsolatedSubnet1SubnetEBD00FC6298E81EF"
+   }
+  },
+  "ExportsOutputRefVPCIsolatedSubnet2Subnet4B1C8CAAD8B83B81": {
+   "Value": {
+    "Ref": "VPCIsolatedSubnet2Subnet4B1C8CAA"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputRefVPCIsolatedSubnet2Subnet4B1C8CAAD8B83B81"
+   }
+  },
+  "ExportsOutputFnGetAttDatabaseSecurityGroup7319C0F6GroupId72A1B827": {
+   "Value": {
+    "Fn::GetAtt": [
+     "DatabaseSecurityGroup7319C0F6",
+     "GroupId"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputFnGetAttDatabaseSecurityGroup7319C0F6GroupId72A1B827"
+   }
+  },
+  "ExportsOutputFnGetAttCacheSecurityGroupC6A3ACCFGroupId492AA7D3": {
+   "Value": {
+    "Fn::GetAtt": [
+     "CacheSecurityGroupC6A3ACCF",
+     "GroupId"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputFnGetAttCacheSecurityGroupC6A3ACCFGroupId492AA7D3"
+   }
+  },
+  "ExportsOutputFnGetAttAlbSecurityGroup86A59E99GroupIdE3A37BC7": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AlbSecurityGroup86A59E99",
+     "GroupId"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputFnGetAttAlbSecurityGroup86A59E99GroupIdE3A37BC7"
+   }
+  },
+  "ExportsOutputRefVPCPublicSubnet1SubnetB4246D30D84F935B": {
+   "Value": {
+    "Ref": "VPCPublicSubnet1SubnetB4246D30"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputRefVPCPublicSubnet1SubnetB4246D30D84F935B"
+   }
+  },
+  "ExportsOutputRefVPCPublicSubnet2Subnet74179F3969CC10AD": {
+   "Value": {
+    "Ref": "VPCPublicSubnet2Subnet74179F39"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputRefVPCPublicSubnet2Subnet74179F3969CC10AD"
+   }
+  },
+  "ExportsOutputRefVPCPrivateSubnet1Subnet8BCA10E01F79A1B7": {
+   "Value": {
+    "Ref": "VPCPrivateSubnet1Subnet8BCA10E0"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputRefVPCPrivateSubnet1Subnet8BCA10E01F79A1B7"
+   }
+  },
+  "ExportsOutputRefVPCPrivateSubnet2SubnetCFCDAA7AB22CF85D": {
+   "Value": {
+    "Ref": "VPCPrivateSubnet2SubnetCFCDAA7A"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputRefVPCPrivateSubnet2SubnetCFCDAA7AB22CF85D"
+   }
+  },
+  "ExportsOutputFnGetAttApiSecurityGroup4E5BB726GroupIdA239A589": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ApiSecurityGroup4E5BB726",
+     "GroupId"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputFnGetAttApiSecurityGroup4E5BB726GroupIdA239A589"
+   }
+  },
+  "ExportsOutputRefVPCB9E5F0B4BD23A326": {
+   "Value": {
+    "Ref": "VPCB9E5F0B4"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputRefVPCB9E5F0B4BD23A326"
+   }
+  },
+  "ExportsOutputFnGetAttWorkerSecurityGroup5529CF0BGroupId178F84DF": {
+   "Value": {
+    "Fn::GetAtt": [
+     "WorkerSecurityGroup5529CF0B",
+     "GroupId"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Network:ExportsOutputFnGetAttWorkerSecurityGroup5529CF0BGroupId178F84DF"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

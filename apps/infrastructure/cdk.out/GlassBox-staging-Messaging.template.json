@@ -1,0 +1,274 @@
+{
+ "Description": "GlassBox Messaging Infrastructure",
+ "Resources": {
+  "AgentDeadLetterQueue7F07CB76": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "MessageRetentionPeriod": 1209600,
+    "QueueName": "glassbox-staging-agent-dlq",
+    "SqsManagedSseEnabled": true,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Messaging"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Messaging/AgentDeadLetterQueue/Resource"
+   }
+  },
+  "AgentQueueFAC8FABD": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "MessageRetentionPeriod": 345600,
+    "QueueName": "glassbox-staging-agent-jobs",
+    "RedrivePolicy": {
+     "deadLetterTargetArn": {
+      "Fn::GetAtt": [
+       "AgentDeadLetterQueue7F07CB76",
+       "Arn"
+      ]
+     },
+     "maxReceiveCount": 3
+    },
+    "SqsManagedSseEnabled": true,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Messaging"
+     }
+    ],
+    "VisibilityTimeout": 900
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Messaging/AgentQueue/Resource"
+   }
+  },
+  "FileDeadLetterQueueDB15DCD6": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "MessageRetentionPeriod": 1209600,
+    "QueueName": "glassbox-staging-file-dlq",
+    "SqsManagedSseEnabled": true,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Messaging"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Messaging/FileDeadLetterQueue/Resource"
+   }
+  },
+  "FileQueueD59508EE": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "MessageRetentionPeriod": 345600,
+    "QueueName": "glassbox-staging-file-jobs",
+    "RedrivePolicy": {
+     "deadLetterTargetArn": {
+      "Fn::GetAtt": [
+       "FileDeadLetterQueueDB15DCD6",
+       "Arn"
+      ]
+     },
+     "maxReceiveCount": 3
+    },
+    "SqsManagedSseEnabled": true,
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Messaging"
+     }
+    ],
+    "VisibilityTimeout": 300
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Messaging/FileQueue/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzI20zNQTCwv1k1OydbNyUzSqw4uSUzO1gEKxRcXFutVB5amlqbqOKflgRm1IJZ/aUlBaUmtTl5+SqpeVrF+mZGJnjnQmKzizEzdotK8kszcVL0gCA0Ax3m+gGMAAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Messaging/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "AgentQueueUrl": {
+   "Description": "Agent jobs queue URL",
+   "Value": {
+    "Ref": "AgentQueueFAC8FABD"
+   },
+   "Export": {
+    "Name": "staging-AgentQueueUrl"
+   }
+  },
+  "AgentQueueArn": {
+   "Description": "Agent jobs queue ARN",
+   "Value": {
+    "Fn::GetAtt": [
+     "AgentQueueFAC8FABD",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "staging-AgentQueueArn"
+   }
+  },
+  "FileQueueUrl": {
+   "Description": "File jobs queue URL",
+   "Value": {
+    "Ref": "FileQueueD59508EE"
+   },
+   "Export": {
+    "Name": "staging-FileQueueUrl"
+   }
+  },
+  "FileQueueArn": {
+   "Description": "File jobs queue ARN",
+   "Value": {
+    "Fn::GetAtt": [
+     "FileQueueD59508EE",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "staging-FileQueueArn"
+   }
+  },
+  "ExportsOutputFnGetAttAgentQueueFAC8FABDArn04EF5DA7": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AgentQueueFAC8FABD",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Messaging:ExportsOutputFnGetAttAgentQueueFAC8FABDArn04EF5DA7"
+   }
+  },
+  "ExportsOutputFnGetAttFileQueueD59508EEArn30672699": {
+   "Value": {
+    "Fn::GetAtt": [
+     "FileQueueD59508EE",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Messaging:ExportsOutputFnGetAttFileQueueD59508EEArn30672699"
+   }
+  },
+  "ExportsOutputRefAgentQueueFAC8FABD09616C7A": {
+   "Value": {
+    "Ref": "AgentQueueFAC8FABD"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Messaging:ExportsOutputRefAgentQueueFAC8FABD09616C7A"
+   }
+  },
+  "ExportsOutputRefFileQueueD59508EEBD4263C6": {
+   "Value": {
+    "Ref": "FileQueueD59508EE"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Messaging:ExportsOutputRefFileQueueD59508EEBD4263C6"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

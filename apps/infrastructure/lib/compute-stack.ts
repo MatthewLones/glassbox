@@ -16,6 +16,9 @@ import { AuthStack } from './auth-stack';
 export interface ComputeStackProps extends cdk.StackProps {
   environment: string;
   vpc: ec2.IVpc;
+  albSecurityGroup: ec2.ISecurityGroup;
+  apiSecurityGroup: ec2.ISecurityGroup;
+  workerSecurityGroup: ec2.ISecurityGroup;
   database: DatabaseStack;
   cache: CacheStack;
   storage: StorageStack;
@@ -41,28 +44,25 @@ export class ComputeStack extends cdk.Stack {
       containerInsights: props.isProduction,
     });
 
-    // ECR Repositories
-    const apiRepo = new ecr.Repository(this, 'ApiRepository', {
-      repositoryName: `glassbox-${props.environment}-api`,
-      removalPolicy: props.isProduction
-        ? cdk.RemovalPolicy.RETAIN
-        : cdk.RemovalPolicy.DESTROY,
-      emptyOnDelete: !props.isProduction,
-    });
+    // ECR Repositories - import existing repositories created outside CDK
+    const apiRepo = ecr.Repository.fromRepositoryName(
+      this,
+      'ApiRepository',
+      `glassbox-${props.environment}-api`
+    );
 
-    const workerRepo = new ecr.Repository(this, 'WorkerRepository', {
-      repositoryName: `glassbox-${props.environment}-worker`,
-      removalPolicy: props.isProduction
-        ? cdk.RemovalPolicy.RETAIN
-        : cdk.RemovalPolicy.DESTROY,
-      emptyOnDelete: !props.isProduction,
-    });
+    const workerRepo = ecr.Repository.fromRepositoryName(
+      this,
+      'WorkerRepository',
+      `glassbox-${props.environment}-worker`
+    );
 
-    // Secret for LLM API keys
-    const llmSecret = new secretsmanager.Secret(this, 'LlmSecret', {
-      secretName: `glassbox/${props.environment}/llm`,
-      description: 'LLM API keys for GlassBox',
-    });
+    // Import existing LLM secret (created outside CDK to prevent deletion on rollback)
+    const llmSecret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      'LlmSecret',
+      `glassbox/${props.environment}/llm`
+    );
 
     // Task execution role
     const executionRole = new iam.Role(this, 'ExecutionRole', {
@@ -119,12 +119,24 @@ export class ComputeStack extends cdk.Stack {
     // Environment variables shared by all services
     const commonEnv = {
       GO_ENV: props.isProduction ? 'production' : 'staging',
+      ENVIRONMENT: props.isProduction ? 'production' : 'staging',
       AWS_REGION: this.region,
       S3_BUCKET: props.storage.filesBucket.bucketName,
       SQS_AGENT_QUEUE_URL: props.messaging.agentQueue.queueUrl,
       SQS_FILE_QUEUE_URL: props.messaging.fileQueue.queueUrl,
       COGNITO_USER_POOL_ID: props.auth.userPool.userPoolId,
       COGNITO_CLIENT_ID: props.auth.userPoolClient.userPoolClientId,
+      COGNITO_REGION: this.region,
+      REDIS_URL: `redis://${props.cache.redisEndpoint}:${props.cache.redisPort}`,
+    };
+
+    // Database secrets - pass individual fields, apps construct connection string
+    const dbSecrets = {
+      DB_HOST: ecs.Secret.fromSecretsManager(props.database.secret, 'host'),
+      DB_PORT: ecs.Secret.fromSecretsManager(props.database.secret, 'port'),
+      DB_USERNAME: ecs.Secret.fromSecretsManager(props.database.secret, 'username'),
+      DB_PASSWORD: ecs.Secret.fromSecretsManager(props.database.secret, 'password'),
+      DB_NAME: ecs.Secret.fromSecretsManager(props.database.secret, 'dbname'),
     };
 
     // API Task Definition
@@ -151,62 +163,31 @@ export class ComputeStack extends cdk.Stack {
           : 'http://localhost:3000,http://localhost:5173',
       },
       secrets: {
-        DATABASE_URL: ecs.Secret.fromSecretsManager(props.database.secret, 'connectionString'),
+        ...dbSecrets,
         JWT_SECRET: ecs.Secret.fromSecretsManager(llmSecret, 'jwtSecret'),
       },
       portMappings: [{ containerPort: 8080 }],
       healthCheck: {
-        command: ['CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1'],
+        // Use GET request (-O /dev/null) instead of HEAD (--spider) for more reliable health checks
+        command: ['CMD-SHELL', 'wget --no-verbose --tries=1 -O /dev/null http://localhost:8080/health || exit 1'],
         interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 3,
-        startPeriod: cdk.Duration.seconds(60),
+        timeout: cdk.Duration.seconds(10),
+        retries: 5,
+        // Increased start period to allow for database, redis, and AWS SDK initialization
+        startPeriod: cdk.Duration.seconds(120),
       },
     });
 
-    // Security group for API
-    const apiSecurityGroup = new ec2.SecurityGroup(this, 'ApiSecurityGroup', {
-      vpc: props.vpc,
-      securityGroupName: `glassbox-${props.environment}-api-sg`,
-      description: 'Security group for GlassBox API',
-      allowAllOutbound: true,
-    });
+    // Use API security group from Network stack
+    const apiSecurityGroup = props.apiSecurityGroup;
 
-    // Allow API to access database and cache
-    props.database.securityGroup.addIngressRule(
-      apiSecurityGroup,
-      ec2.Port.tcp(5432),
-      'Allow PostgreSQL from API'
-    );
-    props.cache.securityGroup.addIngressRule(
-      apiSecurityGroup,
-      ec2.Port.tcp(6379),
-      'Allow Redis from API'
-    );
-
-    // Application Load Balancer
+    // Application Load Balancer (using security group from Network stack)
     this.loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
       loadBalancerName: `glassbox-${props.environment}`,
       vpc: props.vpc,
       internetFacing: true,
-      securityGroup: new ec2.SecurityGroup(this, 'AlbSecurityGroup', {
-        vpc: props.vpc,
-        securityGroupName: `glassbox-${props.environment}-alb-sg`,
-        description: 'Security group for GlassBox ALB',
-        allowAllOutbound: false,
-      }),
+      securityGroup: props.albSecurityGroup,
     });
-
-    // Allow inbound traffic to ALB
-    this.loadBalancer.connections.allowFromAnyIpv4(ec2.Port.tcp(80));
-    this.loadBalancer.connections.allowFromAnyIpv4(ec2.Port.tcp(443));
-
-    // Allow ALB to connect to API
-    apiSecurityGroup.addIngressRule(
-      this.loadBalancer.connections.securityGroups[0],
-      ec2.Port.tcp(8080),
-      'Allow traffic from ALB'
-    );
 
     // API Service
     this.apiService = new ecs.FargateService(this, 'ApiService', {
@@ -231,9 +212,12 @@ export class ComputeStack extends cdk.Stack {
       healthCheck: {
         path: '/health',
         interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(10),
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 5,
       },
+      // Increased deregistration delay to allow graceful shutdown
+      deregistrationDelay: cdk.Duration.seconds(30),
     });
 
     this.apiService.attachToApplicationTargetGroup(targetGroup);
@@ -259,25 +243,8 @@ export class ComputeStack extends cdk.Stack {
       taskRole: workerTaskRole,
     });
 
-    // Security group for workers
-    const workerSecurityGroup = new ec2.SecurityGroup(this, 'WorkerSecurityGroup', {
-      vpc: props.vpc,
-      securityGroupName: `glassbox-${props.environment}-worker-sg`,
-      description: 'Security group for GlassBox workers',
-      allowAllOutbound: true,
-    });
-
-    // Allow workers to access database and cache
-    props.database.securityGroup.addIngressRule(
-      workerSecurityGroup,
-      ec2.Port.tcp(5432),
-      'Allow PostgreSQL from Workers'
-    );
-    props.cache.securityGroup.addIngressRule(
-      workerSecurityGroup,
-      ec2.Port.tcp(6379),
-      'Allow Redis from Workers'
-    );
+    // Use worker security group from Network stack
+    const workerSecurityGroup = props.workerSecurityGroup;
 
     // Agent Worker container
     workerTaskDef.addContainer('agent-worker', {
@@ -293,7 +260,7 @@ export class ComputeStack extends cdk.Stack {
         PYTHONUNBUFFERED: '1',
       },
       secrets: {
-        DATABASE_URL: ecs.Secret.fromSecretsManager(props.database.secret, 'connectionString'),
+        ...dbSecrets,
         ANTHROPIC_API_KEY: ecs.Secret.fromSecretsManager(llmSecret, 'anthropicApiKey'),
         OPENAI_API_KEY: ecs.Secret.fromSecretsManager(llmSecret, 'openaiApiKey'),
       },
@@ -334,7 +301,7 @@ export class ComputeStack extends cdk.Stack {
         PYTHONUNBUFFERED: '1',
       },
       secrets: {
-        DATABASE_URL: ecs.Secret.fromSecretsManager(props.database.secret, 'connectionString'),
+        ...dbSecrets,
         OPENAI_API_KEY: ecs.Secret.fromSecretsManager(llmSecret, 'openaiApiKey'),
       },
     });

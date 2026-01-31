@@ -7,6 +7,7 @@ import { Construct } from 'constructs';
 export interface DatabaseStackProps extends cdk.StackProps {
   environment: string;
   vpc: ec2.IVpc;
+  securityGroup: ec2.ISecurityGroup;
   isProduction: boolean;
 }
 
@@ -18,13 +19,8 @@ export class DatabaseStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: DatabaseStackProps) {
     super(scope, id, props);
 
-    // Security Group for Database
-    this.securityGroup = new ec2.SecurityGroup(this, 'DatabaseSecurityGroup', {
-      vpc: props.vpc,
-      securityGroupName: `glassbox-${props.environment}-db-sg`,
-      description: 'Security group for GlassBox database',
-      allowAllOutbound: false,
-    });
+    // Use security group from Network stack
+    this.securityGroup = props.securityGroup;
 
     // Generate database credentials
     this.secret = new secretsmanager.Secret(this, 'DatabaseSecret', {
@@ -48,7 +44,7 @@ export class DatabaseStack extends cdk.Stack {
     this.instance = new rds.DatabaseInstance(this, 'Database', {
       instanceIdentifier: `glassbox-${props.environment}`,
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_16_1,
+        version: rds.PostgresEngineVersion.VER_16_4,
       }),
       instanceType,
       vpc: props.vpc,
@@ -76,15 +72,16 @@ export class DatabaseStack extends cdk.Stack {
       cloudwatchLogsExports: ['postgresql', 'upgrade'],
       parameterGroup: new rds.ParameterGroup(this, 'ParameterGroup', {
         engine: rds.DatabaseInstanceEngine.postgres({
-          version: rds.PostgresEngineVersion.VER_16_1,
+          version: rds.PostgresEngineVersion.VER_16_4,
         }),
         parameters: {
           // Enable pgvector extension
           'shared_preload_libraries': 'pg_stat_statements',
           // Performance tuning
           'max_connections': props.isProduction ? '200' : '100',
-          'work_mem': '64MB',
-          'maintenance_work_mem': '256MB',
+          // RDS requires memory values in KB (64MB = 65536KB, 256MB = 262144KB)
+          'work_mem': '65536',
+          'maintenance_work_mem': '262144',
         },
       }),
     });

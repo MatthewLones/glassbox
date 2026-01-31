@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "36a6d56d58a02cdd219214e80743ddca1d207ae2281c3a76b0ff7484cf1b22ca": {
+      "displayName": "GlassBox-staging-Auth Template",
+      "source": {
+        "path": "GlassBox-staging-Auth.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "846532307761-us-east-1-44b878b2": {
+          "bucketName": "cdk-hnb659fds-assets-846532307761-us-east-1",
+          "objectKey": "36a6d56d58a02cdd219214e80743ddca1d207ae2281c3a76b0ff7484cf1b22ca.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-file-publishing-role-846532307761-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

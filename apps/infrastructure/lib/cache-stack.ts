@@ -6,27 +6,25 @@ import { Construct } from 'constructs';
 export interface CacheStackProps extends cdk.StackProps {
   environment: string;
   vpc: ec2.IVpc;
+  securityGroup: ec2.ISecurityGroup;
 }
 
 export class CacheStack extends cdk.Stack {
   public readonly cluster: elasticache.CfnCacheCluster;
   public readonly securityGroup: ec2.ISecurityGroup;
   public readonly endpoint: string;
+  public readonly redisEndpoint: string;
+  public readonly redisPort: string;
 
   constructor(scope: Construct, id: string, props: CacheStackProps) {
     super(scope, id, props);
 
-    // Security Group for Redis
-    this.securityGroup = new ec2.SecurityGroup(this, 'CacheSecurityGroup', {
-      vpc: props.vpc,
-      securityGroupName: `glassbox-${props.environment}-cache-sg`,
-      description: 'Security group for GlassBox Redis cache',
-      allowAllOutbound: false,
-    });
+    // Use security group from Network stack
+    this.securityGroup = props.securityGroup;
 
     // Create subnet group for ElastiCache
     const subnetGroup = new elasticache.CfnSubnetGroup(this, 'SubnetGroup', {
-      subnetGroupName: `glassbox-${props.environment}-cache-subnets`,
+      cacheSubnetGroupName: `glassbox-${props.environment}-cache-subnets`,
       description: 'Subnet group for GlassBox Redis cache',
       subnetIds: props.vpc.selectSubnets({
         subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
@@ -50,7 +48,9 @@ export class CacheStack extends cdk.Stack {
     this.cluster.addDependency(subnetGroup);
 
     // Store endpoint for reference
-    this.endpoint = `${this.cluster.attrRedisEndpointAddress}:${this.cluster.attrRedisEndpointPort}`;
+    this.redisEndpoint = this.cluster.attrRedisEndpointAddress;
+    this.redisPort = this.cluster.attrRedisEndpointPort;
+    this.endpoint = `${this.redisEndpoint}:${this.redisPort}`;
 
     // Outputs
     new cdk.CfnOutput(this, 'RedisEndpoint', {

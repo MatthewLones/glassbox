@@ -36,13 +36,18 @@ class SQSConsumer:
         self._running = True
         session = aioboto3.Session()
 
-        async with session.client(
-            "sqs",
-            region_name=self._settings.aws_region,
-            endpoint_url=self._settings.aws_endpoint_url,
-            aws_access_key_id=self._settings.aws_access_key_id or "test",
-            aws_secret_access_key=self._settings.aws_secret_access_key or "test",
-        ) as sqs:
+        # Build client kwargs - only pass credentials if explicitly set (for local dev)
+        client_kwargs = {
+            "region_name": self._settings.aws_region,
+        }
+        if self._settings.aws_endpoint_url:
+            client_kwargs["endpoint_url"] = self._settings.aws_endpoint_url
+        if self._settings.aws_access_key_id:
+            client_kwargs["aws_access_key_id"] = self._settings.aws_access_key_id
+        if self._settings.aws_secret_access_key:
+            client_kwargs["aws_secret_access_key"] = self._settings.aws_secret_access_key
+
+        async with session.client("sqs", **client_kwargs) as sqs:
             logger.info("Starting SQS consumer", queue_url=self.queue_url)
 
             while self._running:
@@ -105,13 +110,18 @@ class SQSProducer:
         """Send a message to the queue."""
         session = aioboto3.Session()
 
-        async with session.client(
-            "sqs",
-            region_name=self._settings.aws_region,
-            endpoint_url=self._settings.aws_endpoint_url,
-            aws_access_key_id=self._settings.aws_access_key_id or "test",
-            aws_secret_access_key=self._settings.aws_secret_access_key or "test",
-        ) as sqs:
+        # Build client kwargs - only pass credentials if explicitly set (for local dev)
+        client_kwargs = {
+            "region_name": self._settings.aws_region,
+        }
+        if self._settings.aws_endpoint_url:
+            client_kwargs["endpoint_url"] = self._settings.aws_endpoint_url
+        if self._settings.aws_access_key_id:
+            client_kwargs["aws_access_key_id"] = self._settings.aws_access_key_id
+        if self._settings.aws_secret_access_key:
+            client_kwargs["aws_secret_access_key"] = self._settings.aws_secret_access_key
+
+        async with session.client("sqs", **client_kwargs) as sqs:
             params = {
                 "QueueUrl": self.queue_url,
                 "MessageBody": json.dumps(message),

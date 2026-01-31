@@ -3,6 +3,7 @@ import type {
   Project,
   Node,
   File,
+  User,
   AgentExecution,
   PaginatedResponse,
   CreateNodeRequest,
@@ -163,6 +164,27 @@ export const searchAPI = {
       method: 'POST',
       body: JSON.stringify({ query }),
     }),
+};
+
+// Users
+export const usersAPI = {
+  me: () => fetchAPI<User>('/api/v1/users/me'),
+  update: (data: Partial<User>) =>
+    fetchAPI<User>('/api/v1/users/me', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+};
+
+// Unified API object for convenient imports
+export const api = {
+  orgs: orgsAPI,
+  projects: projectsAPI,
+  nodes: nodesAPI,
+  executions: executionsAPI,
+  files: filesAPI,
+  search: searchAPI,
+  users: usersAPI,
 };
 
 export { APIError };

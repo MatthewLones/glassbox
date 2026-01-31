@@ -1,0 +1,2028 @@
+{
+  "version": "48.0.0",
+  "artifacts": {
+    "GlassBox-staging-Network.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "GlassBox-staging-Network.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "GlassBox-staging-Network": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://846532307761/us-east-1",
+      "properties": {
+        "templateFile": "GlassBox-staging-Network.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "staging",
+          "ManagedBy": "CDK",
+          "Project": "GlassBox",
+          "Stack": "Network"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-deploy-role-846532307761-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-cfn-exec-role-846532307761-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-846532307761-us-east-1/e757fc97a5233b547fc481748b319c3492ff3656dd1e2c0c2d7121c303e8cb7f.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "GlassBox-staging-Network.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-lookup-role-846532307761-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "GlassBox-staging-Network.assets"
+      ],
+      "metadata": {
+        "/GlassBox-staging-Network": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "staging"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "GlassBox"
+              },
+              {
+                "Key": "Stack",
+                "Value": "Network"
+              }
+            ]
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCB9E5F0B4"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1SubnetB4246D30"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1RouteTableFEE4B781"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1RouteTableAssociation0B0896DC"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1DefaultRoute91CEF279"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet1/EIP": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1EIP6AD938E8"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet1/NATGateway": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1NATGatewayE0556630"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2Subnet74179F39"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2RouteTable6F1A15F1"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2RouteTableAssociation5A808732"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PublicSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2DefaultRouteB7481BBA"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PrivateSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet1Subnet8BCA10E0"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PrivateSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet1RouteTableBE8A6027"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PrivateSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet1RouteTableAssociation347902D1"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PrivateSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet1DefaultRouteAE1D6490"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PrivateSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet2SubnetCFCDAA7A"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PrivateSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet2RouteTable0A19E10E"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PrivateSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet2RouteTableAssociation0C73D413"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/PrivateSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet2DefaultRouteF4F5CFD2"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/IsolatedSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCIsolatedSubnet1SubnetEBD00FC6"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/IsolatedSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCIsolatedSubnet1RouteTableEB156210"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/IsolatedSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCIsolatedSubnet1RouteTableAssociationA2D18F7C"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/IsolatedSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCIsolatedSubnet2Subnet4B1C8CAA"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/IsolatedSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCIsolatedSubnet2RouteTable9B4F78DC"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/IsolatedSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCIsolatedSubnet2RouteTableAssociation7BF8E0EB"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/IGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCIGWB7E252D3"
+          }
+        ],
+        "/GlassBox-staging-Network/VPC/VPCGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCVPCGW99B986DC"
+          }
+        ],
+        "/GlassBox-staging-Network/AlbSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AlbSecurityGroup86A59E99"
+          }
+        ],
+        "/GlassBox-staging-Network/AlbSecurityGroup/to GlassBoxstagingNetworkApiSecurityGroupD8174F54:8080": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AlbSecurityGrouptoGlassBoxstagingNetworkApiSecurityGroupD8174F548080906E3D79"
+          }
+        ],
+        "/GlassBox-staging-Network/ApiSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiSecurityGroup4E5BB726"
+          }
+        ],
+        "/GlassBox-staging-Network/ApiSecurityGroup/from GlassBoxstagingNetworkAlbSecurityGroup39DD9134:8080": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiSecurityGroupfromGlassBoxstagingNetworkAlbSecurityGroup39DD91348080EAFFBED4"
+          }
+        ],
+        "/GlassBox-staging-Network/WorkerSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WorkerSecurityGroup5529CF0B"
+          }
+        ],
+        "/GlassBox-staging-Network/DatabaseSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseSecurityGroup7319C0F6"
+          }
+        ],
+        "/GlassBox-staging-Network/DatabaseSecurityGroup/from GlassBoxstagingNetworkApiSecurityGroupD8174F54:5432": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseSecurityGroupfromGlassBoxstagingNetworkApiSecurityGroupD8174F54543261B57666"
+          }
+        ],
+        "/GlassBox-staging-Network/DatabaseSecurityGroup/from GlassBoxstagingNetworkWorkerSecurityGroup18AD6DE2:5432": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseSecurityGroupfromGlassBoxstagingNetworkWorkerSecurityGroup18AD6DE25432F09A6D79"
+          }
+        ],
+        "/GlassBox-staging-Network/CacheSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CacheSecurityGroupC6A3ACCF"
+          }
+        ],
+        "/GlassBox-staging-Network/CacheSecurityGroup/from GlassBoxstagingNetworkApiSecurityGroupD8174F54:6379": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CacheSecurityGroupfromGlassBoxstagingNetworkApiSecurityGroupD8174F5463791C9496A3"
+          }
+        ],
+        "/GlassBox-staging-Network/CacheSecurityGroup/from GlassBoxstagingNetworkWorkerSecurityGroup18AD6DE2:6379": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CacheSecurityGroupfromGlassBoxstagingNetworkWorkerSecurityGroup18AD6DE26379BA674A18"
+          }
+        ],
+        "/GlassBox-staging-Network/VpcId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VpcId"
+          }
+        ],
+        "/GlassBox-staging-Network/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Ref\":\"VPCIsolatedSubnet1SubnetEBD00FC6\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPCIsolatedSubnet1SubnetEBD00FC6298E81EF"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Ref\":\"VPCIsolatedSubnet2Subnet4B1C8CAA\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPCIsolatedSubnet2Subnet4B1C8CAAD8B83B81"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Fn::GetAtt\":[\"DatabaseSecurityGroup7319C0F6\",\"GroupId\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttDatabaseSecurityGroup7319C0F6GroupId72A1B827"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Fn::GetAtt\":[\"CacheSecurityGroupC6A3ACCF\",\"GroupId\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttCacheSecurityGroupC6A3ACCFGroupId492AA7D3"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Fn::GetAtt\":[\"AlbSecurityGroup86A59E99\",\"GroupId\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttAlbSecurityGroup86A59E99GroupIdE3A37BC7"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Ref\":\"VPCPublicSubnet1SubnetB4246D30\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPCPublicSubnet1SubnetB4246D30D84F935B"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Ref\":\"VPCPublicSubnet2Subnet74179F39\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPCPublicSubnet2Subnet74179F3969CC10AD"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Ref\":\"VPCPrivateSubnet1Subnet8BCA10E0\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPCPrivateSubnet1Subnet8BCA10E01F79A1B7"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Ref\":\"VPCPrivateSubnet2SubnetCFCDAA7A\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPCPrivateSubnet2SubnetCFCDAA7AB22CF85D"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Fn::GetAtt\":[\"ApiSecurityGroup4E5BB726\",\"GroupId\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttApiSecurityGroup4E5BB726GroupIdA239A589"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Ref\":\"VPCB9E5F0B4\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVPCB9E5F0B4BD23A326"
+          }
+        ],
+        "/GlassBox-staging-Network/Exports/Output{\"Fn::GetAtt\":[\"WorkerSecurityGroup5529CF0B\",\"GroupId\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttWorkerSecurityGroup5529CF0BGroupId178F84DF"
+          }
+        ],
+        "/GlassBox-staging-Network/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/GlassBox-staging-Network/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "GlassBox-staging-Network"
+    },
+    "GlassBox-staging-Database.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "GlassBox-staging-Database.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "GlassBox-staging-Database": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://846532307761/us-east-1",
+      "properties": {
+        "templateFile": "GlassBox-staging-Database.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "staging",
+          "ManagedBy": "CDK",
+          "Project": "GlassBox",
+          "Stack": "Database"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-deploy-role-846532307761-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-cfn-exec-role-846532307761-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-846532307761-us-east-1/d3d48e48ca6ef250fb8d9a83be0ce33d9df85e64b0eec6d2c6f01b413a01d3cd.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "GlassBox-staging-Database.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-lookup-role-846532307761-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "GlassBox-staging-Network",
+        "GlassBox-staging-Database.assets"
+      ],
+      "metadata": {
+        "/GlassBox-staging-Database": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "staging"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "GlassBox"
+              },
+              {
+                "Key": "Stack",
+                "Value": "Database"
+              }
+            ]
+          }
+        ],
+        "/GlassBox-staging-Database/DatabaseSecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseSecret86DBB7B3"
+          }
+        ],
+        "/GlassBox-staging-Database/DatabaseSecret/Attachment/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseSecretAttachment9A63A3D4"
+          }
+        ],
+        "/GlassBox-staging-Database/ParameterGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ParameterGroup5E32DECB"
+          }
+        ],
+        "/GlassBox-staging-Database/Database/SubnetGroup/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseSubnetGroup7D60F180"
+          }
+        ],
+        "/GlassBox-staging-Database/Database/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseB269D8BB"
+          }
+        ],
+        "/GlassBox-staging-Database/DatabaseEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseEndpoint"
+          }
+        ],
+        "/GlassBox-staging-Database/DatabasePort": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabasePort"
+          }
+        ],
+        "/GlassBox-staging-Database/DatabaseSecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseSecretArn"
+          }
+        ],
+        "/GlassBox-staging-Database/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/GlassBox-staging-Database/Exports/Output{\"Ref\":\"DatabaseSecret86DBB7B3\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefDatabaseSecret86DBB7B353068790"
+          }
+        ],
+        "/GlassBox-staging-Database/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/GlassBox-staging-Database/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "GlassBox-staging-Database"
+    },
+    "GlassBox-staging-Cache.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "GlassBox-staging-Cache.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "GlassBox-staging-Cache": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://846532307761/us-east-1",
+      "properties": {
+        "templateFile": "GlassBox-staging-Cache.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "staging",
+          "ManagedBy": "CDK",
+          "Project": "GlassBox",
+          "Stack": "Cache"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-deploy-role-846532307761-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-cfn-exec-role-846532307761-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-846532307761-us-east-1/10f5fa0b44882fda572caeec8f873e6b3226108e4717a28e4cde0862666c129d.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "GlassBox-staging-Cache.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-lookup-role-846532307761-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "GlassBox-staging-Network",
+        "GlassBox-staging-Cache.assets"
+      ],
+      "metadata": {
+        "/GlassBox-staging-Cache": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "staging"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "GlassBox"
+              },
+              {
+                "Key": "Stack",
+                "Value": "Cache"
+              }
+            ]
+          }
+        ],
+        "/GlassBox-staging-Cache/SubnetGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubnetGroup"
+          }
+        ],
+        "/GlassBox-staging-Cache/RedisCluster": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisCluster"
+          }
+        ],
+        "/GlassBox-staging-Cache/RedisEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisEndpoint"
+          }
+        ],
+        "/GlassBox-staging-Cache/RedisPort": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisPort"
+          }
+        ],
+        "/GlassBox-staging-Cache/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/GlassBox-staging-Cache/Exports/Output{\"Fn::GetAtt\":[\"RedisCluster\",\"RedisEndpoint.Address\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttRedisClusterRedisEndpointAddress2C712DA2"
+          }
+        ],
+        "/GlassBox-staging-Cache/Exports/Output{\"Fn::GetAtt\":[\"RedisCluster\",\"RedisEndpoint.Port\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttRedisClusterRedisEndpointPortD2710AFC"
+          }
+        ],
+        "/GlassBox-staging-Cache/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/GlassBox-staging-Cache/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "GlassBox-staging-Cache"
+    },
+    "GlassBox-staging-Storage.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "GlassBox-staging-Storage.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "GlassBox-staging-Storage": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://846532307761/us-east-1",
+      "properties": {
+        "templateFile": "GlassBox-staging-Storage.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "staging",
+          "ManagedBy": "CDK",
+          "Project": "GlassBox",
+          "Stack": "Storage"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-deploy-role-846532307761-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-cfn-exec-role-846532307761-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-846532307761-us-east-1/e8c5fc16095261bd7c24cb2782432572be92caaf857c21c497b6cfc3f09e2015.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "GlassBox-staging-Storage.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-lookup-role-846532307761-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "GlassBox-staging-Storage.assets"
+      ],
+      "metadata": {
+        "/GlassBox-staging-Storage": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "staging"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "GlassBox"
+              },
+              {
+                "Key": "Stack",
+                "Value": "Storage"
+              }
+            ]
+          }
+        ],
+        "/GlassBox-staging-Storage/FilesBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilesBucket16450113"
+          }
+        ],
+        "/GlassBox-staging-Storage/FilesBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilesBucketPolicy8CA19688"
+          }
+        ],
+        "/GlassBox-staging-Storage/FilesBucket/AutoDeleteObjectsCustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilesBucketAutoDeleteObjectsCustomResource1910D462"
+          }
+        ],
+        "/GlassBox-staging-Storage/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
+          {
+            "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+            "data": true
+          }
+        ],
+        "/GlassBox-staging-Storage/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+          }
+        ],
+        "/GlassBox-staging-Storage/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+          }
+        ],
+        "/GlassBox-staging-Storage/Distribution/Origin1/S3Origin/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DistributionOrigin1S3Origin5F5C0696"
+          }
+        ],
+        "/GlassBox-staging-Storage/Distribution/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Distribution830FAC52"
+          }
+        ],
+        "/GlassBox-staging-Storage/FilesBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilesBucketName"
+          }
+        ],
+        "/GlassBox-staging-Storage/FilesBucketArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilesBucketArn"
+          }
+        ],
+        "/GlassBox-staging-Storage/DistributionDomain": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DistributionDomain"
+          }
+        ],
+        "/GlassBox-staging-Storage/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/GlassBox-staging-Storage/Exports/Output{\"Fn::GetAtt\":[\"FilesBucket16450113\",\"Arn\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttFilesBucket16450113Arn55CDC1C6"
+          }
+        ],
+        "/GlassBox-staging-Storage/Exports/Output{\"Ref\":\"FilesBucket16450113\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefFilesBucket164501139A977DFC"
+          }
+        ],
+        "/GlassBox-staging-Storage/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/GlassBox-staging-Storage/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "GlassBox-staging-Storage"
+    },
+    "GlassBox-staging-Messaging.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "GlassBox-staging-Messaging.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "GlassBox-staging-Messaging": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://846532307761/us-east-1",
+      "properties": {
+        "templateFile": "GlassBox-staging-Messaging.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "staging",
+          "ManagedBy": "CDK",
+          "Project": "GlassBox",
+          "Stack": "Messaging"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-deploy-role-846532307761-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-cfn-exec-role-846532307761-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-846532307761-us-east-1/752c67877306ebba10fd4d66f0fe0643aacf26a60270e38bb0f60a92ca551704.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "GlassBox-staging-Messaging.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-lookup-role-846532307761-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "GlassBox-staging-Messaging.assets"
+      ],
+      "metadata": {
+        "/GlassBox-staging-Messaging": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "staging"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "GlassBox"
+              },
+              {
+                "Key": "Stack",
+                "Value": "Messaging"
+              }
+            ]
+          }
+        ],
+        "/GlassBox-staging-Messaging/AgentDeadLetterQueue/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AgentDeadLetterQueue7F07CB76"
+          }
+        ],
+        "/GlassBox-staging-Messaging/AgentQueue/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AgentQueueFAC8FABD"
+          }
+        ],
+        "/GlassBox-staging-Messaging/FileDeadLetterQueue/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FileDeadLetterQueueDB15DCD6"
+          }
+        ],
+        "/GlassBox-staging-Messaging/FileQueue/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FileQueueD59508EE"
+          }
+        ],
+        "/GlassBox-staging-Messaging/AgentQueueUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AgentQueueUrl"
+          }
+        ],
+        "/GlassBox-staging-Messaging/AgentQueueArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AgentQueueArn"
+          }
+        ],
+        "/GlassBox-staging-Messaging/FileQueueUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FileQueueUrl"
+          }
+        ],
+        "/GlassBox-staging-Messaging/FileQueueArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FileQueueArn"
+          }
+        ],
+        "/GlassBox-staging-Messaging/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/GlassBox-staging-Messaging/Exports/Output{\"Fn::GetAtt\":[\"AgentQueueFAC8FABD\",\"Arn\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttAgentQueueFAC8FABDArn04EF5DA7"
+          }
+        ],
+        "/GlassBox-staging-Messaging/Exports/Output{\"Fn::GetAtt\":[\"FileQueueD59508EE\",\"Arn\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttFileQueueD59508EEArn30672699"
+          }
+        ],
+        "/GlassBox-staging-Messaging/Exports/Output{\"Ref\":\"AgentQueueFAC8FABD\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefAgentQueueFAC8FABD09616C7A"
+          }
+        ],
+        "/GlassBox-staging-Messaging/Exports/Output{\"Ref\":\"FileQueueD59508EE\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefFileQueueD59508EEBD4263C6"
+          }
+        ],
+        "/GlassBox-staging-Messaging/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/GlassBox-staging-Messaging/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "GlassBox-staging-Messaging"
+    },
+    "GlassBox-staging-Auth.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "GlassBox-staging-Auth.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "GlassBox-staging-Auth": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://846532307761/us-east-1",
+      "properties": {
+        "templateFile": "GlassBox-staging-Auth.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "staging",
+          "ManagedBy": "CDK",
+          "Project": "GlassBox",
+          "Stack": "Auth"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-deploy-role-846532307761-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-cfn-exec-role-846532307761-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-846532307761-us-east-1/36a6d56d58a02cdd219214e80743ddca1d207ae2281c3a76b0ff7484cf1b22ca.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "GlassBox-staging-Auth.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-lookup-role-846532307761-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "GlassBox-staging-Auth.assets"
+      ],
+      "metadata": {
+        "/GlassBox-staging-Auth": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "staging"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "GlassBox"
+              },
+              {
+                "Key": "Stack",
+                "Value": "Auth"
+              }
+            ]
+          }
+        ],
+        "/GlassBox-staging-Auth/UserPool/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPool6BA7E5F2"
+          }
+        ],
+        "/GlassBox-staging-Auth/UserPoolClient/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPoolClient2F5918F7"
+          }
+        ],
+        "/GlassBox-staging-Auth/UserPoolId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPoolId"
+          }
+        ],
+        "/GlassBox-staging-Auth/UserPoolClientId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPoolClientId"
+          }
+        ],
+        "/GlassBox-staging-Auth/UserPoolArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPoolArn"
+          }
+        ],
+        "/GlassBox-staging-Auth/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/GlassBox-staging-Auth/Exports/Output{\"Ref\":\"UserPool6BA7E5F2\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefUserPool6BA7E5F296FD7236"
+          }
+        ],
+        "/GlassBox-staging-Auth/Exports/Output{\"Ref\":\"UserPoolClient2F5918F7\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefUserPoolClient2F5918F753847A55"
+          }
+        ],
+        "/GlassBox-staging-Auth/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/GlassBox-staging-Auth/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "GlassBox-staging-Auth"
+    },
+    "GlassBox-staging-Compute.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "GlassBox-staging-Compute.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "GlassBox-staging-Compute": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://846532307761/us-east-1",
+      "properties": {
+        "templateFile": "GlassBox-staging-Compute.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "staging",
+          "ManagedBy": "CDK",
+          "Project": "GlassBox",
+          "Stack": "Compute"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-deploy-role-846532307761-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-cfn-exec-role-846532307761-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-846532307761-us-east-1/72f77ea702f6afb9dc1ba8b746dc22f7c3bce57c6bfa770cb6a022e2453a76e7.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "GlassBox-staging-Compute.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-lookup-role-846532307761-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "GlassBox-staging-Network",
+        "GlassBox-staging-Database",
+        "GlassBox-staging-Cache",
+        "GlassBox-staging-Storage",
+        "GlassBox-staging-Messaging",
+        "GlassBox-staging-Auth",
+        "GlassBox-staging-Compute.assets"
+      ],
+      "metadata": {
+        "/GlassBox-staging-Compute": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "staging"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "GlassBox"
+              },
+              {
+                "Key": "Stack",
+                "Value": "Compute"
+              }
+            ]
+          }
+        ],
+        "/GlassBox-staging-Compute/Cluster/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ClusterEB0386A7"
+          }
+        ],
+        "/GlassBox-staging-Compute/ExecutionRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExecutionRole605A040B"
+          }
+        ],
+        "/GlassBox-staging-Compute/ExecutionRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExecutionRoleDefaultPolicyA5B92313"
+          }
+        ],
+        "/GlassBox-staging-Compute/ApiTaskRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiTaskRole12FAD4A7"
+          }
+        ],
+        "/GlassBox-staging-Compute/ApiTaskRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiTaskRoleDefaultPolicyBEF5D530"
+          }
+        ],
+        "/GlassBox-staging-Compute/WorkerTaskRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WorkerTaskRole013F226A"
+          }
+        ],
+        "/GlassBox-staging-Compute/WorkerTaskRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WorkerTaskRoleDefaultPolicy4DD5AEA2"
+          }
+        ],
+        "/GlassBox-staging-Compute/ApiLogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiLogGroup1DEDFC07"
+          }
+        ],
+        "/GlassBox-staging-Compute/WorkerLogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WorkerLogGroup31FDBE4A"
+          }
+        ],
+        "/GlassBox-staging-Compute/ApiTaskDef/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiTaskDef37DBDBD0"
+          }
+        ],
+        "/GlassBox-staging-Compute/ALB/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ALBAEE750D2"
+          }
+        ],
+        "/GlassBox-staging-Compute/ALB/HttpListener/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ALBHttpListener04CE8CD0"
+          }
+        ],
+        "/GlassBox-staging-Compute/ApiService": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "minHealthyPercent has not been configured so the default value of 50% is used. The number of running tasks will decrease below the desired count during deployments etc. See https://github.com/aws/aws-cdk/issues/31705 [ack: @aws-cdk/aws-ecs:minHealthyPercent]",
+            "trace": [
+              "Annotations.addMessage (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "new BaseService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:12364)",
+              "new FargateService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:6371)",
+              "new FargateService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new ComputeStack (/Users/matthewlones/git/glassbox/apps/infrastructure/lib/compute-stack.ts:193:23)",
+              "Object.<anonymous> (/Users/matthewlones/git/glassbox/apps/infrastructure/bin/glassbox.ts:101:22)",
+              "Module._compile (node:internal/modules/cjs/loader:1738:14)",
+              "Module.m._compile (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1871:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1470:32)",
+              "Module._load (node:internal/modules/cjs/loader:1290:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:238:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1738:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1871:10)",
+              "Module.load (node:internal/modules/cjs/loader:1470:32)",
+              "Module._load (node:internal/modules/cjs/loader:1290:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:238:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          }
+        ],
+        "/GlassBox-staging-Compute/ApiService/Service": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiServiceC9037CF0"
+          }
+        ],
+        "/GlassBox-staging-Compute/ApiTargetGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiTargetGroup5723F19D"
+          }
+        ],
+        "/GlassBox-staging-Compute/WorkerTaskDef/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WorkerTaskDef3CFCC8D9"
+          }
+        ],
+        "/GlassBox-staging-Compute/AgentWorkerService": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "minHealthyPercent has not been configured so the default value of 50% is used. The number of running tasks will decrease below the desired count during deployments etc. See https://github.com/aws/aws-cdk/issues/31705 [ack: @aws-cdk/aws-ecs:minHealthyPercent]",
+            "trace": [
+              "Annotations.addMessage (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "new BaseService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:12364)",
+              "new FargateService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:6371)",
+              "new FargateService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new ComputeStack (/Users/matthewlones/git/glassbox/apps/infrastructure/lib/compute-stack.ts:270:31)",
+              "Object.<anonymous> (/Users/matthewlones/git/glassbox/apps/infrastructure/bin/glassbox.ts:101:22)",
+              "Module._compile (node:internal/modules/cjs/loader:1738:14)",
+              "Module.m._compile (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1871:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1470:32)",
+              "Module._load (node:internal/modules/cjs/loader:1290:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:238:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1738:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1871:10)",
+              "Module.load (node:internal/modules/cjs/loader:1470:32)",
+              "Module._load (node:internal/modules/cjs/loader:1290:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:238:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          }
+        ],
+        "/GlassBox-staging-Compute/AgentWorkerService/Service": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AgentWorkerServiceDE58B9C3"
+          }
+        ],
+        "/GlassBox-staging-Compute/FileWorkerTaskDef/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FileWorkerTaskDef2E1CFBA7"
+          }
+        ],
+        "/GlassBox-staging-Compute/FileWorkerService": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "minHealthyPercent has not been configured so the default value of 50% is used. The number of running tasks will decrease below the desired count during deployments etc. See https://github.com/aws/aws-cdk/issues/31705 [ack: @aws-cdk/aws-ecs:minHealthyPercent]",
+            "trace": [
+              "Annotations.addMessage (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "new BaseService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:12364)",
+              "new FargateService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:6371)",
+              "new FargateService2 (/Users/matthewlones/git/glassbox/apps/infrastructure/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new ComputeStack (/Users/matthewlones/git/glassbox/apps/infrastructure/lib/compute-stack.ts:310:30)",
+              "Object.<anonymous> (/Users/matthewlones/git/glassbox/apps/infrastructure/bin/glassbox.ts:101:22)",
+              "Module._compile (node:internal/modules/cjs/loader:1738:14)",
+              "Module.m._compile (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1871:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1470:32)",
+              "Module._load (node:internal/modules/cjs/loader:1290:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:238:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/matthewlones/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1738:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1871:10)",
+              "Module.load (node:internal/modules/cjs/loader:1470:32)",
+              "Module._load (node:internal/modules/cjs/loader:1290:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:238:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          }
+        ],
+        "/GlassBox-staging-Compute/FileWorkerService/Service": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FileWorkerService5860E915"
+          }
+        ],
+        "/GlassBox-staging-Compute/LoadBalancerDns": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LoadBalancerDns"
+          }
+        ],
+        "/GlassBox-staging-Compute/ApiRepositoryUri": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiRepositoryUri"
+          }
+        ],
+        "/GlassBox-staging-Compute/WorkerRepositoryUri": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WorkerRepositoryUri"
+          }
+        ],
+        "/GlassBox-staging-Compute/ClusterName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ClusterName"
+          }
+        ],
+        "/GlassBox-staging-Compute/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/GlassBox-staging-Compute/Exports/Output{\"Ref\":\"ClusterEB0386A7\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefClusterEB0386A796A0E3FE"
+          }
+        ],
+        "/GlassBox-staging-Compute/Exports/Output{\"Fn::GetAtt\":[\"ApiServiceC9037CF0\",\"Name\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttApiServiceC9037CF0Name3E44BA2D"
+          }
+        ],
+        "/GlassBox-staging-Compute/Exports/Output{\"Fn::GetAtt\":[\"AgentWorkerServiceDE58B9C3\",\"Name\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttAgentWorkerServiceDE58B9C3Name3E3CF868"
+          }
+        ],
+        "/GlassBox-staging-Compute/Exports/Output{\"Fn::GetAtt\":[\"FileWorkerService5860E915\",\"Name\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttFileWorkerService5860E915Name5A307F02"
+          }
+        ],
+        "/GlassBox-staging-Compute/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/GlassBox-staging-Compute/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "GlassBox-staging-Compute"
+    },
+    "GlassBox-staging-Monitoring.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "GlassBox-staging-Monitoring.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "GlassBox-staging-Monitoring": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://846532307761/us-east-1",
+      "properties": {
+        "templateFile": "GlassBox-staging-Monitoring.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "staging",
+          "ManagedBy": "CDK",
+          "Project": "GlassBox",
+          "Stack": "Monitoring"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-deploy-role-846532307761-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-cfn-exec-role-846532307761-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-846532307761-us-east-1/3dabf0876aa63153b1554332d4f4897e407ed26bd46936fa3870a164929add5f.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "GlassBox-staging-Monitoring.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::846532307761:role/cdk-hnb659fds-lookup-role-846532307761-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "GlassBox-staging-Compute",
+        "GlassBox-staging-Monitoring.assets"
+      ],
+      "metadata": {
+        "/GlassBox-staging-Monitoring": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "staging"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "GlassBox"
+              },
+              {
+                "Key": "Stack",
+                "Value": "Monitoring"
+              }
+            ]
+          }
+        ],
+        "/GlassBox-staging-Monitoring/AlarmTopic/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AlarmTopicD01E77F9"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/ApiCpuAlarm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiCpuAlarm8FA6A548"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/ApiMemoryAlarm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiMemoryAlarm149B8177"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/DbCpuAlarm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DbCpuAlarmF24BD102"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/DbConnectionsAlarm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DbConnectionsAlarm7767BF57"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/DbStorageAlarm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DbStorageAlarm004E7006"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/Dashboard/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Dashboard9E4231ED"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/AlarmTopicArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AlarmTopicArn"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/DashboardUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DashboardUrl"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/GlassBox-staging-Monitoring/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "GlassBox-staging-Monitoring"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    },
+    "aws-cdk-lib/feature-flag-report": {
+      "type": "cdk:feature-flag-report",
+      "properties": {
+        "module": "aws-cdk-lib",
+        "flags": {
+          "@aws-cdk/aws-signer:signingProfileNamePassedToCfn": {
+            "recommendedValue": true,
+            "explanation": "Pass signingProfileName to CfnSigningProfile"
+          },
+          "@aws-cdk/core:newStyleStackSynthesis": {
+            "recommendedValue": true,
+            "explanation": "Switch to new stack synthesis method which enables CI/CD",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/core:stackRelativeExports": {
+            "recommendedValue": true,
+            "explanation": "Name exports based on the construct paths relative to the stack, rather than the global construct path",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-ecs-patterns:secGroupsDisablesImplicitOpenListener": {
+            "recommendedValue": true,
+            "explanation": "Disable implicit openListener when custom security groups are provided"
+          },
+          "@aws-cdk/aws-rds:lowercaseDbIdentifier": {
+            "recommendedValue": true,
+            "explanation": "Force lowercasing of RDS Cluster names in CDK",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": {
+            "recommendedValue": true,
+            "explanation": "Allow adding/removing multiple UsagePlanKeys independently",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-lambda:recognizeVersionProps": {
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to opt in to the updated logical id calculation for Lambda Version created using the  `fn.currentVersion`.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-lambda:recognizeLayerVersion": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to opt in to the updated logical id calculation for Lambda Version created using the `fn.currentVersion`."
+          },
+          "@aws-cdk/aws-cloudfront:defaultSecurityPolicyTLSv1.2_2021": {
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to have cloudfront distributions use the security policy TLSv1.2_2021 by default.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/core:checkSecretUsage": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this flag to make it impossible to accidentally use SecretValues in unsafe locations"
+          },
+          "@aws-cdk/core:target-partitions": {
+            "userValue": [
+              "aws",
+              "aws-cn"
+            ],
+            "recommendedValue": [
+              "aws",
+              "aws-cn"
+            ],
+            "explanation": "What regions to include in lookup tables of environment agnostic stacks"
+          },
+          "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "ECS extensions will automatically add an `awslogs` driver if no logging is specified"
+          },
+          "@aws-cdk/aws-ec2:uniqueImdsv2TemplateName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to have Launch Templates generated by the `InstanceRequireImdsv2Aspect` use unique names."
+          },
+          "@aws-cdk/aws-ecs:arnFormatIncludesClusterName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "ARN format used by ECS. In the new ARN format, the cluster name is part of the resource ID."
+          },
+          "@aws-cdk/aws-iam:minimizePolicies": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Minimize IAM policies by combining Statements"
+          },
+          "@aws-cdk/core:validateSnapshotRemovalPolicy": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Error on snapshot removal policies on resources that do not support it."
+          },
+          "@aws-cdk/aws-codepipeline:crossAccountKeyAliasStackSafeResourceName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Generate key aliases that include the stack name"
+          },
+          "@aws-cdk/aws-s3:createDefaultLoggingPolicy": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to create an S3 bucket policy by default in cases where an AWS service would automatically create the Policy if one does not exist."
+          },
+          "@aws-cdk/aws-sns-subscriptions:restrictSqsDescryption": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Restrict KMS key policy for encrypted Queues a bit more"
+          },
+          "@aws-cdk/aws-apigateway:disableCloudWatchRole": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Make default CloudWatch Role behavior safe for multiple API Gateways in one environment"
+          },
+          "@aws-cdk/core:enablePartitionLiterals": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Make ARNs concrete if AWS partition is known"
+          },
+          "@aws-cdk/aws-events:eventsTargetQueueSameAccount": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Event Rules may only push to encrypted SQS queues in the same account"
+          },
+          "@aws-cdk/aws-ecs:disableExplicitDeploymentControllerForCircuitBreaker": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Avoid setting the \"ECS\" deployment controller when adding a circuit breaker"
+          },
+          "@aws-cdk/aws-iam:importedRoleStackSafeDefaultPolicyName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this feature to create default policy names for imported roles that depend on the stack the role is in."
+          },
+          "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Use S3 Bucket Policy instead of ACLs for Server Access Logging"
+          },
+          "@aws-cdk/aws-route53-patters:useCertificate": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Use the official `Certificate` resource instead of `DnsValidatedCertificate`"
+          },
+          "@aws-cdk/customresources:installLatestAwsSdkDefault": {
+            "userValue": false,
+            "recommendedValue": false,
+            "explanation": "Whether to install the latest SDK by default in AwsCustomResource"
+          },
+          "@aws-cdk/aws-rds:databaseProxyUniqueResourceName": {
+            "recommendedValue": true,
+            "explanation": "Use unique resource name for Database Proxy"
+          },
+          "@aws-cdk/aws-codedeploy:removeAlarmsFromDeploymentGroup": {
+            "recommendedValue": true,
+            "explanation": "Remove CloudWatch alarms from deployment group"
+          },
+          "@aws-cdk/aws-apigateway:authorizerChangeDeploymentLogicalId": {
+            "recommendedValue": true,
+            "explanation": "Include authorizer configuration in the calculation of the API deployment logical ID."
+          },
+          "@aws-cdk/aws-ec2:launchTemplateDefaultUserData": {
+            "recommendedValue": true,
+            "explanation": "Define user data for a launch template by default when a machine image is provided."
+          },
+          "@aws-cdk/aws-secretsmanager:useAttachedSecretResourcePolicyForSecretTargetAttachments": {
+            "recommendedValue": true,
+            "explanation": "SecretTargetAttachments uses the ResourcePolicy of the attached Secret."
+          },
+          "@aws-cdk/aws-redshift:columnId": {
+            "recommendedValue": true,
+            "explanation": "Whether to use an ID to track Redshift column changes"
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:enableEmrServicePolicyV2": {
+            "recommendedValue": true,
+            "explanation": "Enable AmazonEMRServicePolicy_v2 managed policies"
+          },
+          "@aws-cdk/aws-ec2:restrictDefaultSecurityGroup": {
+            "recommendedValue": true,
+            "explanation": "Restrict access to the VPC default security group"
+          },
+          "@aws-cdk/aws-apigateway:requestValidatorUniqueId": {
+            "recommendedValue": true,
+            "explanation": "Generate a unique id for each RequestValidator added to a method"
+          },
+          "@aws-cdk/aws-kms:aliasNameRef": {
+            "recommendedValue": true,
+            "explanation": "KMS Alias name and keyArn will have implicit reference to KMS Key"
+          },
+          "@aws-cdk/aws-kms:applyImportedAliasPermissionsToPrincipal": {
+            "recommendedValue": true,
+            "explanation": "Enable grant methods on Aliases imported by name to use kms:ResourceAliases condition"
+          },
+          "@aws-cdk/aws-autoscaling:generateLaunchTemplateInsteadOfLaunchConfig": {
+            "recommendedValue": true,
+            "explanation": "Generate a launch template when creating an AutoScalingGroup"
+          },
+          "@aws-cdk/core:includePrefixInUniqueNameGeneration": {
+            "recommendedValue": true,
+            "explanation": "Include the stack prefix in the stack name generation process"
+          },
+          "@aws-cdk/aws-efs:denyAnonymousAccess": {
+            "recommendedValue": true,
+            "explanation": "EFS denies anonymous clients accesses"
+          },
+          "@aws-cdk/aws-opensearchservice:enableOpensearchMultiAzWithStandby": {
+            "recommendedValue": true,
+            "explanation": "Enables support for Multi-AZ with Standby deployment for opensearch domains"
+          },
+          "@aws-cdk/aws-lambda-nodejs:useLatestRuntimeVersion": {
+            "recommendedValue": true,
+            "explanation": "Enables aws-lambda-nodejs.Function to use the latest available NodeJs runtime as the default"
+          },
+          "@aws-cdk/aws-efs:mountTargetOrderInsensitiveLogicalId": {
+            "recommendedValue": true,
+            "explanation": "When enabled, mount targets will have a stable logicalId that is linked to the associated subnet."
+          },
+          "@aws-cdk/aws-rds:auroraClusterChangeScopeOfInstanceParameterGroupWithEachParameters": {
+            "recommendedValue": true,
+            "explanation": "When enabled, a scope of InstanceParameterGroup for AuroraClusterInstance with each parameters will change."
+          },
+          "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": {
+            "recommendedValue": true,
+            "explanation": "When enabled, will always use the arn for identifiers for CfnSourceApiAssociation in the GraphqlApi construct rather than id."
+          },
+          "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": {
+            "recommendedValue": true,
+            "explanation": "When enabled, creating an RDS database cluster from a snapshot will only render credentials for snapshot credentials."
+          },
+          "@aws-cdk/aws-codepipeline-actions:useNewDefaultBranchForCodeCommitSource": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the CodeCommit source action is using the default branch name 'main'."
+          },
+          "@aws-cdk/aws-cloudwatch-actions:changeLambdaPermissionLogicalIdForLambdaAction": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the logical ID of a Lambda permission for a Lambda action includes an alarm ID."
+          },
+          "@aws-cdk/aws-codepipeline:crossAccountKeysDefaultValueToFalse": {
+            "recommendedValue": true,
+            "explanation": "Enables Pipeline to set the default value for crossAccountKeys to false."
+          },
+          "@aws-cdk/aws-codepipeline:defaultPipelineTypeToV2": {
+            "recommendedValue": true,
+            "explanation": "Enables Pipeline to set the default pipeline type to V2."
+          },
+          "@aws-cdk/aws-kms:reduceCrossAccountRegionPolicyScope": {
+            "recommendedValue": true,
+            "explanation": "When enabled, IAM Policy created from KMS key grant will reduce the resource scope to this key only."
+          },
+          "@aws-cdk/pipelines:reduceAssetRoleTrustScope": {
+            "recommendedValue": true,
+            "explanation": "Remove the root account principal from PipelineAssetsFileRole trust policy",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-eks:nodegroupNameAttribute": {
+            "recommendedValue": true,
+            "explanation": "When enabled, nodegroupName attribute of the provisioned EKS NodeGroup will not have the cluster name prefix."
+          },
+          "@aws-cdk/aws-ec2:ebsDefaultGp3Volume": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the default volume type of the EBS volume will be GP3"
+          },
+          "@aws-cdk/aws-ecs:removeDefaultDeploymentAlarm": {
+            "recommendedValue": true,
+            "explanation": "When enabled, remove default deployment alarm settings"
+          },
+          "@aws-cdk/custom-resources:logApiResponseDataPropertyTrueDefault": {
+            "recommendedValue": false,
+            "explanation": "When enabled, the custom resource used for `AwsCustomResource` will configure the `logApiResponseData` property as true by default"
+          },
+          "@aws-cdk/aws-s3:keepNotificationInImportedBucket": {
+            "recommendedValue": false,
+            "explanation": "When enabled, Adding notifications to a bucket in the current stack will not remove notification from imported stack."
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:useNewS3UriParametersForBedrockInvokeModelTask": {
+            "recommendedValue": true,
+            "explanation": "When enabled, use new props for S3 URI field in task definition of state machine for bedrock invoke model.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/core:explicitStackTags": {
+            "recommendedValue": true,
+            "explanation": "When enabled, stack tags need to be assigned explicitly on a Stack."
+          },
+          "@aws-cdk/aws-ecs:reduceEc2FargateCloudWatchPermissions": {
+            "recommendedValue": true,
+            "explanation": "When enabled, we will only grant the necessary permissions when users specify cloudwatch log group through logConfiguration"
+          },
+          "@aws-cdk/aws-dynamodb:resourcePolicyPerReplica": {
+            "recommendedValue": true,
+            "explanation": "When enabled will allow you to specify a resource policy per replica, and not copy the source table policy to all replicas"
+          },
+          "@aws-cdk/aws-ec2:ec2SumTImeoutEnabled": {
+            "recommendedValue": true,
+            "explanation": "When enabled, initOptions.timeout and resourceSignalTimeout values will be summed together."
+          },
+          "@aws-cdk/aws-appsync:appSyncGraphQLAPIScopeLambdaPermission": {
+            "recommendedValue": true,
+            "explanation": "When enabled, a Lambda authorizer Permission created when using GraphqlApi will be properly scoped with a SourceArn."
+          },
+          "@aws-cdk/aws-rds:setCorrectValueForDatabaseInstanceReadReplicaInstanceResourceId": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the value of property `instanceResourceId` in construct `DatabaseInstanceReadReplica` will be set to the correct value which is `DbiResourceId` instead of currently `DbInstanceArn`"
+          },
+          "@aws-cdk/core:cfnIncludeRejectComplexResourceUpdateCreatePolicyIntrinsics": {
+            "recommendedValue": true,
+            "explanation": "When enabled, CFN templates added with `cfn-include` will error if the template contains Resource Update or Create policies with CFN Intrinsics that include non-primitive values."
+          },
+          "@aws-cdk/aws-lambda-nodejs:sdkV3ExcludeSmithyPackages": {
+            "recommendedValue": true,
+            "explanation": "When enabled, both `@aws-sdk` and `@smithy` packages will be excluded from the Lambda Node.js 18.x runtime to prevent version mismatches in bundled applications."
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:fixRunEcsTaskPolicy": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the resource of IAM Run Ecs policy generated by SFN EcsRunTask will reference the definition, instead of constructing ARN."
+          },
+          "@aws-cdk/aws-ec2:bastionHostUseAmazonLinux2023ByDefault": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the BastionHost construct will use the latest Amazon Linux 2023 AMI, instead of Amazon Linux 2."
+          },
+          "@aws-cdk/core:aspectStabilization": {
+            "recommendedValue": true,
+            "explanation": "When enabled, a stabilization loop will be run when invoking Aspects during synthesis.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-route53-targets:userPoolDomainNameMethodWithoutCustomResource": {
+            "recommendedValue": true,
+            "explanation": "When enabled, use a new method for DNS Name of user pool domain target without creating a custom resource."
+          },
+          "@aws-cdk/aws-elasticloadbalancingV2:albDualstackWithoutPublicIpv4SecurityGroupRulesDefault": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the default security group ingress rules will allow IPv6 ingress from anywhere"
+          },
+          "@aws-cdk/aws-iam:oidcRejectUnauthorizedConnections": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the default behaviour of OIDC provider will reject unauthorized connections"
+          },
+          "@aws-cdk/core:enableAdditionalMetadataCollection": {
+            "recommendedValue": true,
+            "explanation": "When enabled, CDK will expand the scope of usage data collected to better inform CDK development and improve communication for security concerns and emerging issues."
+          },
+          "@aws-cdk/aws-lambda:createNewPoliciesWithAddToRolePolicy": {
+            "recommendedValue": false,
+            "explanation": "[Deprecated] When enabled, Lambda will create new inline policies with AddToRolePolicy instead of adding to the Default Policy Statement"
+          },
+          "@aws-cdk/aws-s3:setUniqueReplicationRoleName": {
+            "recommendedValue": true,
+            "explanation": "When enabled, CDK will automatically generate a unique role name that is used for s3 object replication."
+          },
+          "@aws-cdk/pipelines:reduceStageRoleTrustScope": {
+            "recommendedValue": true,
+            "explanation": "Remove the root account principal from Stage addActions trust policy",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-events:requireEventBusPolicySid": {
+            "recommendedValue": true,
+            "explanation": "When enabled, grantPutEventsTo() will use resource policies with Statement IDs for service principals."
+          },
+          "@aws-cdk/core:aspectPrioritiesMutating": {
+            "recommendedValue": true,
+            "explanation": "When set to true, Aspects added by the construct library on your behalf will be given a priority of MUTATING."
+          },
+          "@aws-cdk/aws-dynamodb:retainTableReplica": {
+            "recommendedValue": true,
+            "explanation": "When enabled, table replica will be default to the removal policy of source table unless specified otherwise."
+          },
+          "@aws-cdk/cognito:logUserPoolClientSecretValue": {
+            "recommendedValue": false,
+            "explanation": "When disabled, the value of the user pool client secret will not be logged in the custom resource lambda function logs."
+          },
+          "@aws-cdk/pipelines:reduceCrossAccountActionRoleTrustScope": {
+            "recommendedValue": true,
+            "explanation": "When enabled, scopes down the trust policy for the cross-account action role",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-stepfunctions:useDistributedMapResultWriterV2": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the resultWriterV2 property of DistributedMap will be used insted of resultWriter"
+          },
+          "@aws-cdk/s3-notifications:addS3TrustKeyPolicyForSnsSubscriptions": {
+            "recommendedValue": true,
+            "explanation": "Add an S3 trust policy to a KMS key resource policy for SNS subscriptions."
+          },
+          "@aws-cdk/aws-ec2:requirePrivateSubnetsForEgressOnlyInternetGateway": {
+            "recommendedValue": true,
+            "explanation": "When enabled, the EgressOnlyGateway resource is only created if private subnets are defined in the dual-stack VPC."
+          },
+          "@aws-cdk/aws-ec2-alpha:useResourceIdForVpcV2Migration": {
+            "recommendedValue": false,
+            "explanation": "When enabled, use resource IDs for VPC V2 migration"
+          },
+          "@aws-cdk/aws-s3:publicAccessBlockedByDefault": {
+            "recommendedValue": true,
+            "explanation": "When enabled, setting any combination of options for BlockPublicAccess will automatically set true for any options not defined."
+          },
+          "@aws-cdk/aws-lambda:useCdkManagedLogGroup": {
+            "recommendedValue": true,
+            "explanation": "When enabled, CDK creates and manages loggroup for the lambda function"
+          },
+          "@aws-cdk/aws-elasticloadbalancingv2:networkLoadBalancerWithSecurityGroupByDefault": {
+            "recommendedValue": true,
+            "explanation": "When enabled, Network Load Balancer will be created with a security group by default."
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:httpInvokeDynamicJsonPathEndpoint": {
+            "recommendedValue": true,
+            "explanation": "When enabled, allows using a dynamic apiEndpoint with JSONPath format in HttpInvoke tasks.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-ecs-patterns:uniqueTargetGroupId": {
+            "recommendedValue": true,
+            "explanation": "When enabled, ECS patterns will generate unique target group IDs to prevent conflicts during load balancer replacement"
+          },
+          "@aws-cdk/aws-route53-patterns:useDistribution": {
+            "recommendedValue": true,
+            "explanation": "Use the `Distribution` resource instead of `CloudFrontWebDistribution`"
+          }
+        }
+      }
+    }
+  },
+  "minimumCliVersion": "2.1033.0"
+}

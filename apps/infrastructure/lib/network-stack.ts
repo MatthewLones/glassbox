@@ -8,6 +8,7 @@ export interface NetworkStackProps extends cdk.StackProps {
 
 export class NetworkStack extends cdk.Stack {
   public readonly vpc: ec2.IVpc;
+  public readonly albSecurityGroup: ec2.ISecurityGroup;
   public readonly apiSecurityGroup: ec2.ISecurityGroup;
   public readonly workerSecurityGroup: ec2.ISecurityGroup;
   public readonly databaseSecurityGroup: ec2.ISecurityGroup;
@@ -40,6 +41,26 @@ export class NetworkStack extends cdk.Stack {
       ],
     });
 
+    // Security Group for ALB (Application Load Balancer)
+    this.albSecurityGroup = new ec2.SecurityGroup(this, 'AlbSecurityGroup', {
+      vpc: this.vpc,
+      securityGroupName: `glassbox-${props.environment}-alb-sg`,
+      description: 'Security group for GlassBox ALB',
+      allowAllOutbound: false,
+    });
+
+    // Allow inbound HTTP/HTTPS to ALB from internet
+    this.albSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(80),
+      'Allow HTTP traffic'
+    );
+    this.albSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(443),
+      'Allow HTTPS traffic'
+    );
+
     // Security Group for API/WebSocket services
     this.apiSecurityGroup = new ec2.SecurityGroup(this, 'ApiSecurityGroup', {
       vpc: this.vpc,
@@ -48,11 +69,18 @@ export class NetworkStack extends cdk.Stack {
       allowAllOutbound: true,
     });
 
-    // Allow inbound HTTP/HTTPS from anywhere (via ALB)
+    // Allow traffic from ALB to API
     this.apiSecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
+      this.albSecurityGroup,
       ec2.Port.tcp(8080),
-      'Allow HTTP traffic'
+      'Allow traffic from ALB'
+    );
+
+    // Allow ALB to send traffic to API (egress rule)
+    this.albSecurityGroup.addEgressRule(
+      this.apiSecurityGroup,
+      ec2.Port.tcp(8080),
+      'Allow outbound to API'
     );
 
     // Security Group for Workers

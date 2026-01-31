@@ -1,0 +1,439 @@
+{
+ "Description": "GlassBox Storage Infrastructure",
+ "Resources": {
+  "FilesBucket16450113": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": "glassbox-staging-files-846532307761",
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "GET",
+        "PUT",
+        "POST"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ],
+       "MaxAge": 3600
+      }
+     ]
+    },
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 7
+       },
+       "Id": "DeleteIncompleteMultipartUploads",
+       "Status": "Enabled"
+      },
+      {
+       "Id": "TransitionToInfrequentAccess",
+       "Status": "Enabled",
+       "Transitions": [
+        {
+         "StorageClass": "STANDARD_IA",
+         "TransitionInDays": 90
+        }
+       ]
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Storage"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Storage/FilesBucket/Resource"
+   }
+  },
+  "FilesBucketPolicy8CA19688": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "FilesBucket16450113"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:PutBucketPolicy"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "FilesBucket16450113",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "FilesBucket16450113",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "DistributionOrigin1S3Origin5F5C0696",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "FilesBucket16450113",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Storage/FilesBucket/Policy/Resource"
+   }
+  },
+  "FilesBucketAutoDeleteObjectsCustomResource1910D462": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "FilesBucket16450113"
+    }
+   },
+   "DependsOn": [
+    "FilesBucketPolicy8CA19688"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Storage/FilesBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Storage/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-846532307761-us-east-1",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "FilesBucket16450113"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Storage/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "DistributionOrigin1S3Origin5F5C0696": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "Identity for GlassBoxstagingStorageDistributionOrigin1A8BC8857"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Storage/Distribution/Origin1/S3Origin/Resource"
+   }
+  },
+  "Distribution830FAC52": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "Comment": "GlassBox staging file distribution",
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "CachedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "Compress": true,
+      "OriginRequestPolicyId": "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf",
+      "TargetOriginId": "GlassBoxstagingStorageDistributionOrigin1A8BC8857",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "FilesBucket16450113",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "GlassBoxstagingStorageDistributionOrigin1A8BC8857",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "DistributionOrigin1S3Origin5F5C0696"
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ],
+     "PriceClass": "PriceClass_100"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Storage"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Storage/Distribution/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/3VQywrCQAz8Fu/bVaro2VYET5b6AVJ305I+dmWTVaT0391aQT14ymQykyGJZbxcy8WsuFOkdBO1eJH9iQvViECde1rKPvGqARZpad5oKpltUT0+9NQPQrXW69JZw7LfIbHDi2e0RhwdVmi2SgHRQYNh5Jc9HQ370fBP8b1mGETqiW2XA1nvFIyCD/4ZZc7eUINLCgKxJQIOp4WEavQcPV89D8JYDbKm+S1eyU14RU2IkfMhvAOZT/UJYHdzUScBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Storage/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "FilesBucketName": {
+   "Description": "Files bucket name",
+   "Value": {
+    "Ref": "FilesBucket16450113"
+   },
+   "Export": {
+    "Name": "staging-FilesBucketName"
+   }
+  },
+  "FilesBucketArn": {
+   "Description": "Files bucket ARN",
+   "Value": {
+    "Fn::GetAtt": [
+     "FilesBucket16450113",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "staging-FilesBucketArn"
+   }
+  },
+  "DistributionDomain": {
+   "Description": "CloudFront distribution domain",
+   "Value": {
+    "Fn::GetAtt": [
+     "Distribution830FAC52",
+     "DomainName"
+    ]
+   },
+   "Export": {
+    "Name": "staging-DistributionDomain"
+   }
+  },
+  "ExportsOutputFnGetAttFilesBucket16450113Arn55CDC1C6": {
+   "Value": {
+    "Fn::GetAtt": [
+     "FilesBucket16450113",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Storage:ExportsOutputFnGetAttFilesBucket16450113Arn55CDC1C6"
+   }
+  },
+  "ExportsOutputRefFilesBucket164501139A977DFC": {
+   "Value": {
+    "Ref": "FilesBucket16450113"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Storage:ExportsOutputRefFilesBucket164501139A977DFC"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

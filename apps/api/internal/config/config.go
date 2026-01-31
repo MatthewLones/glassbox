@@ -38,10 +38,24 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
+	// Build database URL from components or use DATABASE_URL directly
+	databaseURL := getEnv("DATABASE_URL", "")
+	if databaseURL == "" {
+		// Construct from individual environment variables (for AWS Secrets Manager)
+		dbHost := getEnv("DB_HOST", "localhost")
+		dbPort := getEnv("DB_PORT", "5432")
+		dbUser := getEnv("DB_USERNAME", "glassbox")
+		dbPass := getEnv("DB_PASSWORD", "glassbox_dev")
+		dbName := getEnv("DB_NAME", "glassbox")
+		sslMode := getEnv("DB_SSLMODE", "require") // Use 'require' for RDS
+		databaseURL = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+			dbUser, dbPass, dbHost, dbPort, dbName, sslMode)
+	}
+
 	cfg := &Config{
 		Port:               getEnv("PORT", "8080"),
 		Environment:        getEnv("GO_ENV", "development"),
-		DatabaseURL:        getEnv("DATABASE_URL", "postgres://glassbox:glassbox_dev@localhost:5432/glassbox?sslmode=disable"),
+		DatabaseURL:        databaseURL,
 		RedisURL:           getEnv("REDIS_URL", "redis://localhost:6379"),
 		AWSRegion:          getEnv("AWS_REGION", "us-east-1"),
 		S3Bucket:           getEnv("S3_BUCKET", "glassbox-files-dev"),

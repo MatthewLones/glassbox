@@ -1,0 +1,294 @@
+{
+ "Description": "GlassBox Database Infrastructure",
+ "Resources": {
+  "DatabaseSecret86DBB7B3": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "GlassBox database credentials",
+    "GenerateSecretString": {
+     "ExcludePunctuation": true,
+     "GenerateStringKey": "password",
+     "PasswordLength": 32,
+     "SecretStringTemplate": "{\"username\":\"glassbox\"}"
+    },
+    "Name": "glassbox/staging/database",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Database"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Database/DatabaseSecret/Resource"
+   }
+  },
+  "DatabaseSecretAttachment9A63A3D4": {
+   "Type": "AWS::SecretsManager::SecretTargetAttachment",
+   "Properties": {
+    "SecretId": {
+     "Ref": "DatabaseSecret86DBB7B3"
+    },
+    "TargetId": {
+     "Ref": "DatabaseB269D8BB"
+    },
+    "TargetType": "AWS::RDS::DBInstance"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Database/DatabaseSecret/Attachment/Resource"
+   }
+  },
+  "ParameterGroup5E32DECB": {
+   "Type": "AWS::RDS::DBParameterGroup",
+   "Properties": {
+    "Description": "Parameter group for postgres16",
+    "Family": "postgres16",
+    "Parameters": {
+     "shared_preload_libraries": "pg_stat_statements",
+     "max_connections": "100",
+     "work_mem": "65536",
+     "maintenance_work_mem": "262144"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Database"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Database/ParameterGroup/Resource"
+   }
+  },
+  "DatabaseSubnetGroup7D60F180": {
+   "Type": "AWS::RDS::DBSubnetGroup",
+   "Properties": {
+    "DBSubnetGroupDescription": "Subnet group for Database database",
+    "SubnetIds": [
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCIsolatedSubnet1SubnetEBD00FC6298E81EF"
+     },
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputRefVPCIsolatedSubnet2Subnet4B1C8CAAD8B83B81"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Database"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Database/Database/SubnetGroup/Default"
+   }
+  },
+  "DatabaseB269D8BB": {
+   "Type": "AWS::RDS::DBInstance",
+   "Properties": {
+    "AllocatedStorage": "20",
+    "AutoMinorVersionUpgrade": true,
+    "BackupRetentionPeriod": 7,
+    "CopyTagsToSnapshot": true,
+    "DBInstanceClass": "db.t4g.small",
+    "DBInstanceIdentifier": "glassbox-staging",
+    "DBName": "glassbox",
+    "DBParameterGroupName": {
+     "Ref": "ParameterGroup5E32DECB"
+    },
+    "DBSubnetGroupName": {
+     "Ref": "DatabaseSubnetGroup7D60F180"
+    },
+    "DeletionProtection": false,
+    "EnableCloudwatchLogsExports": [
+     "postgresql",
+     "upgrade"
+    ],
+    "EnablePerformanceInsights": false,
+    "Engine": "postgres",
+    "EngineVersion": "16.4",
+    "MasterUserPassword": {
+     "Fn::Join": [
+      "",
+      [
+       "{{resolve:secretsmanager:",
+       {
+        "Ref": "DatabaseSecret86DBB7B3"
+       },
+       ":SecretString:password::}}"
+      ]
+     ]
+    },
+    "MasterUsername": {
+     "Fn::Join": [
+      "",
+      [
+       "{{resolve:secretsmanager:",
+       {
+        "Ref": "DatabaseSecret86DBB7B3"
+       },
+       ":SecretString:username::}}"
+      ]
+     ]
+    },
+    "MaxAllocatedStorage": 100,
+    "MultiAZ": false,
+    "PubliclyAccessible": false,
+    "StorageEncrypted": true,
+    "StorageType": "gp3",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "staging"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "GlassBox"
+     },
+     {
+      "Key": "Stack",
+      "Value": "Database"
+     }
+    ],
+    "VPCSecurityGroups": [
+     {
+      "Fn::ImportValue": "GlassBox-staging-Network:ExportsOutputFnGetAttDatabaseSecurityGroup7319C0F6GroupId72A1B827"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Database/Database/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2VPyw6CMBD8Fu+lGjR69pEYTxrxbpayYsEWst3qgfDvFtGE4Gl2XplsLOP5Us4m8HKRysrooVPZJAyqFEG6Ng4VITsDFnKkYH242N7s9+rhApQjrzkU7wbtIDB2WkGZk80JCAwy0p4qX3fx3Wak7YAhBYcH6xisQpH41CIPCn/CL9q2HT96rn0YtFWGsnDTZ7yQq/Br4bSOyFvWBuW5xzdVbP8lCAEAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlassBox-staging-Database/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "DatabaseEndpoint": {
+   "Description": "Database endpoint",
+   "Value": {
+    "Fn::GetAtt": [
+     "DatabaseB269D8BB",
+     "Endpoint.Address"
+    ]
+   },
+   "Export": {
+    "Name": "staging-DatabaseEndpoint"
+   }
+  },
+  "DatabasePort": {
+   "Description": "Database port",
+   "Value": {
+    "Fn::GetAtt": [
+     "DatabaseB269D8BB",
+     "Endpoint.Port"
+    ]
+   },
+   "Export": {
+    "Name": "staging-DatabasePort"
+   }
+  },
+  "DatabaseSecretArn": {
+   "Description": "Database secret ARN",
+   "Value": {
+    "Ref": "DatabaseSecret86DBB7B3"
+   },
+   "Export": {
+    "Name": "staging-DatabaseSecretArn"
+   }
+  },
+  "ExportsOutputRefDatabaseSecret86DBB7B353068790": {
+   "Value": {
+    "Ref": "DatabaseSecret86DBB7B3"
+   },
+   "Export": {
+    "Name": "GlassBox-staging-Database:ExportsOutputRefDatabaseSecret86DBB7B353068790"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

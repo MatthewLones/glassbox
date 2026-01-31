@@ -2,9 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@glassbox/shared-types'],
-  experimental: {
-    typedRoutes: true,
-  },
+  // Note: typedRoutes disabled as it causes issues with dynamic routes
+  // experimental: {
+  //   typedRoutes: true,
+  // },
   async rewrites() {
     return [
       {
