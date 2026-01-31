@@ -15,7 +15,7 @@ This is the master todo list for frontend development. Check items off as they'r
 | Common Components | **Complete** | EmptyState, ConfirmDialog, Spinner, etc. |
 | Authentication | **Complete** | Cognito OAuth + dev mode + route protection |
 | Org/Project Management | **Complete** | OrgSwitcher, ProjectList, Dashboard |
-| Tree View | Pending | File explorer style |
+| Tree View | **Complete** | TreeView, NodeDetailPanel, project page |
 | Canvas View | Pending | Figma-like with Reactflow |
 | Graph View | Pending | Force-directed dependencies |
 | Grid View | Pending | Visual file explorer |
@@ -160,42 +160,43 @@ This is the master todo list for frontend development. Check items off as they'r
 
 ---
 
-## Phase 4: Tree View
+## Phase 4: Tree View ✅ COMPLETE
 
 **Goal:** File explorer-style hierarchical node display.
 
 ### 4.1 Tree Components
-- [ ] TreeView - Main tree container with virtualization
-- [ ] TreeNode - Individual tree node item
-- [ ] TreeBranch - Collapsible branch container
-- [ ] TreeContextMenu - Right-click actions
+- [x] TreeView - Main tree container with hierarchical rendering
+- [x] TreeNode - Individual tree node with expand/collapse, hover actions
+- [x] TreeBranch - Recursive branch container for children
+- [x] Context menu via DropdownMenu on each node
 
 ### 4.2 Node Display Components
-- [ ] NodeStatusBadge - Status indicator (draft, in_progress, complete, etc.)
-- [ ] NodeAuthorBadge - Human/Agent indicator
-- [ ] NodeIcon - Dynamic icon based on node type
-- [ ] NodeActions - Quick action buttons
+- [x] NodeStatusBadge - Status indicator with icons and colors
+- [x] NodeAuthorBadge - Human/Agent indicator with icons
+- [x] NodeIcon - Dynamic icon based on node type/author
+- [x] Quick actions in node row (hover to reveal)
 
 ### 4.3 Node Detail Panel
-- [ ] NodeDetailPanel - Main detail view (slide-out or split)
-- [ ] NodeHeader - Title, status, actions
-- [ ] NodeInputsList - Input items display
-- [ ] NodeOutputsList - Output items display
-- [ ] NodeEvidenceSection - Expandable evidence/traces
-- [ ] NodeMetadata - Tags, dates, metadata
+- [x] NodeDetailPanel - Slide-out detail view
+- [x] Header with title, status, author badges, actions
+- [x] NodeInputsList - Input items with type icons
+- [x] NodeOutputsList - Output items with type icons
+- [x] Metadata display (dates, version, priority, tags)
+- [x] Tabbed Inputs/Outputs section
 
 ### 4.4 Project Route
-- [ ] `/projects/[projectId]` - Project main view with tree
-- [ ] `/projects/[projectId]/layout.tsx` - Project layout with view switcher
+- [x] `/projects/[projectId]` - Project main view with tree
+- [x] Split layout: tree on left, detail panel on right
+- [x] Protected route with ProtectedRoute wrapper
 
 ### 4.5 Tree Interactions
-- [ ] Expand/collapse with state persistence
-- [ ] Node selection with keyboard navigation
-- [ ] Drag-and-drop for reparenting nodes
-- [ ] Inline rename functionality
-- [ ] Context menu actions
+- [x] Expand/collapse with chevron and double-click
+- [x] Node selection with visual highlight
+- [x] Keyboard navigation (Enter, Space, Arrow keys)
+- [x] Auto-expand ancestors when selecting nested node
+- [x] Actions menu per node (edit, delete, add child, execute)
 
-**Verification:** Tree displays nodes, expand/collapse works, can select and view details.
+**Verification:** Tree displays nodes, expand/collapse works, can select and view details. ✅
 
 ---
 

@@ -9,6 +9,280 @@ This document logs all significant changes made during development. Each entry i
 
 ---
 
+## [2026-01-31] V2 Phase 8: Grid View (Hierarchical File Explorer)
+
+### Summary
+Completed Phase 8 with a Notion-style hierarchical file explorer. Users navigate into nodes like folders, with breadcrumb navigation showing the current path. Leaf nodes display their evidence (inputs, outputs, subnodes).
+
+### Justification
+The grid view provides an intuitive file-explorer metaphor for navigating the node hierarchy. Users can drill down through the structure and see evidence when they reach leaf nodes.
+
+### Technical Details
+
+**Grid Components (`components/grid/`):**
+- `GridView` - Main container with breadcrumb, grid, and evidence views
+- `GridBreadcrumb` - Slash-separated path navigation (Root / Parent / Child)
+- `GridNodeCard` - File/folder style cards with status, author, actions
+- `GridEvidenceView` - Shows inputs, outputs, and subnodes for leaf nodes
+
+**Features:**
+- Breadcrumb navigation showing current path
+- Double-click to navigate into a node
+- Single-click to select and show detail panel
+- Cards show folder icon (has children) or file icon (leaf node)
+- Leaf nodes show evidence view with:
+  - Subnodes section
+  - Inputs section (files, links, node references)
+  - Outputs section (text, files, structured data)
+- Empty states with "Add node" button
+- Status bar showing item count and description
+
+### Files Modified
+- Created: `components/grid/grid-view.tsx`
+- Created: `components/grid/grid-breadcrumb.tsx`
+- Created: `components/grid/grid-node-card.tsx`
+- Created: `components/grid/grid-evidence-view.tsx`
+- Created: `components/grid/index.ts`
+- Modified: `app/projects/[projectId]/page.tsx` - Added GridView integration, enabled all views
+
+---
+
+## [2026-01-31] V2 Phase 7: Graph View (Force-Directed Layout)
+
+### Summary
+Completed Phase 7 with a force-directed graph visualization using d3-force. Nodes cluster by relationships and users can explore dependencies visually.
+
+### Justification
+The graph view provides a different perspective on node relationships - especially useful for understanding dependency chains and identifying clusters of related work.
+
+### Technical Details
+
+**Force Layout (`lib/graph/force-layout.ts`):**
+- d3-force simulation with link, charge, center, and collide forces
+- Converts GlassBox nodes to graph nodes with position tracking
+- Creates links from parent-child and input dependencies
+
+**Graph Components (`components/graph/`):**
+- `GraphView` - SVG-based view with pan/zoom, hover highlighting
+- `GraphNode` - Circular node with status ring, author indicator, title
+- `GraphToolbar` - Zoom in/out, fit view, reset layout buttons
+- `GraphLegend` - Status colors, author types, connection types
+
+**Features:**
+- Force-directed auto-layout
+- Hover to highlight connected nodes (dims unconnected)
+- Click to select node and show detail panel
+- Pan by dragging, zoom with scroll wheel
+- Reset layout button re-runs simulation
+- Status shown as colored ring around node
+- Author type (H/A) indicator badge
+
+### Files Modified
+- Created: `lib/graph/force-layout.ts`
+- Created: `components/graph/graph-view.tsx`
+- Created: `components/graph/graph-node.tsx`
+- Created: `components/graph/graph-toolbar.tsx`
+- Created: `components/graph/graph-legend.tsx`
+- Created: `components/graph/index.ts`
+- Modified: `app/projects/[projectId]/page.tsx` - Added GraphView integration
+- Added dependency: `d3-force`, `@types/d3-force`
+
+---
+
+## [2026-01-31] V2 Phase 6: Canvas View (Reactflow Integration)
+
+### Summary
+Completed Phase 6 of GlassBox V2 Frontend with a Figma-like infinite canvas using Reactflow. Users can now view and interact with nodes in a spatial layout with pan, zoom, and grid controls.
+
+### Justification
+The canvas view is the primary visualization for GlassBox, enabling users to spatially organize nodes and see relationships. This provides a more intuitive way to work with complex node hierarchies compared to the tree view.
+
+### Technical Details
+
+**Canvas Core Components (`components/canvas/`):**
+- `CanvasProvider` - React context for canvas callbacks (select, edit, delete, add child, execute, position change)
+- `CanvasView` - Main Reactflow wrapper with node/edge rendering, viewport management
+
+**Custom Node Types (`components/canvas/nodes/`):**
+- `GlassboxNode` - Glass-styled card showing title, description, status badge, author badge, version
+- Hover actions for edit, add child, execute (for agent nodes), delete
+- Input/output handles for connections
+
+**Custom Edge Types (`components/canvas/edges/`):**
+- `ParentChildEdge` - Solid bezier line for parent-child relationships
+- `DependencyEdge` - Dashed animated line with label for input dependencies
+
+**Canvas Controls (`components/canvas/controls/`):**
+- `CanvasToolbar` - Toolbar with interaction mode (select/pan), grid toggle, snap-to-grid, zoom controls, minimap toggle, auto-layout
+- `ZoomIndicator` - Current zoom percentage display
+
+**Canvas Utilities (`lib/canvas/`):**
+- `canvas-utils.ts` - Convert GlassBox nodes to Reactflow format, edge generation, auto-layout algorithm, snap-to-grid helper
+
+**Canvas State (`stores/canvas-store.ts`):**
+- Viewport position and zoom
+- Grid visibility and snap settings
+- Minimap visibility
+- Interaction mode (pan/select)
+
+**View Switcher (`components/navigation/view-switcher.tsx`):**
+- Tab navigation between Tree, Canvas, Graph, Grid views
+- Keyboard shortcuts (Cmd+1-4)
+- URL sync (?view=canvas)
+
+**Project Page Integration:**
+- View mode stored in URL query params
+- Canvas view renders with CanvasProvider wrapper
+- All node actions (select, edit, delete, add child, execute) connected
+- Position changes logged (ready for persistence)
+
+### Files Modified
+- Created: `components/canvas/canvas-provider.tsx`
+- Created: `components/canvas/canvas-view.tsx`
+- Created: `components/canvas/index.ts`
+- Created: `components/canvas/nodes/glassbox-node.tsx`
+- Created: `components/canvas/edges/parent-child-edge.tsx`
+- Created: `components/canvas/edges/dependency-edge.tsx`
+- Created: `components/canvas/controls/canvas-toolbar.tsx`
+- Created: `components/canvas/controls/zoom-indicator.tsx`
+- Created: `components/navigation/view-switcher.tsx`
+- Created: `lib/canvas/canvas-utils.ts`
+- Created: `stores/canvas-store.ts`
+- Modified: `app/projects/[projectId]/page.tsx` - Added view switching and canvas integration
+
+---
+
+## [2026-01-31] V2 Phase 5: Node CRUD Operations Complete
+
+### Summary
+Completed Phase 5 of GlassBox V2 Frontend with full node CRUD forms, file upload components, version history panel, and evidence management.
+
+### Justification
+Users need to create, edit, and delete nodes with proper form validation. The evidence concept (files, links, text, subnodes) is critical for supporting claims within nodes. Version history enables tracking changes and rollback.
+
+### Technical Details
+
+**Node Form Components (`components/node/forms/`):**
+- `CreateNodeForm` - Dialog with Basic/Settings tabs, author type toggle
+- `EditNodeForm` - Edit existing node with form validation
+- `StatusSelect` - Workflow status dropdown with icons and colors
+- `AuthorSelect` - Human/Agent toggle buttons
+- `AddEvidenceForm` - Tabbed form for adding link/file/text evidence
+- `AddInputForm` - Add node references or links as inputs
+- `AddOutputForm` - Add node references or text as outputs
+- `NodeReferencePicker` - Tree-style multi-select for choosing nodes
+
+**File Components (`components/file/`):**
+- `FileUploadZone` - Drag-and-drop upload area with progress
+- `FilePreview` - Icon/thumbnail preview based on file type
+- `FileListItem` - File row with actions dropdown
+- `FileList` - List container for multiple files
+
+**File Upload Hook (`hooks/use-file-upload.ts`):**
+- Presigned URL workflow (get URL, upload to S3, confirm)
+- Progress tracking with status states
+- File validation (size, type)
+- Multiple file support
+
+**Version History (`components/node/`):**
+- `VersionHistoryPanel` - Sheet with version timeline
+- `VersionDiffViewer` - Side-by-side version comparison
+- `DeleteNodeDialog` - Confirmation with child count warning
+
+**Project Page Integration:**
+- All forms wired to open from tree and detail panel
+- Mock version history for demo
+- Child count calculation for delete warnings
+
+**Key Features:**
+- React Hook Form for validation and state
+- Glass modal aesthetic consistent with design system
+- Evidence as first-class concept (subnodes + files + links + text)
+- Presigned URL upload pattern for secure file uploads
+- Version history with diff viewing and revert capability
+
+### Files Created
+- `apps/web/src/components/node/forms/create-node-form.tsx`
+- `apps/web/src/components/node/forms/edit-node-form.tsx`
+- `apps/web/src/components/node/forms/add-evidence-form.tsx`
+- `apps/web/src/components/node/forms/add-input-form.tsx`
+- `apps/web/src/components/node/forms/add-output-form.tsx`
+- `apps/web/src/components/node/forms/status-select.tsx`
+- `apps/web/src/components/node/forms/author-select.tsx`
+- `apps/web/src/components/node/forms/node-reference-picker.tsx`
+- `apps/web/src/components/node/forms/index.ts`
+- `apps/web/src/components/node/version-history-panel.tsx`
+- `apps/web/src/components/node/version-diff-viewer.tsx`
+- `apps/web/src/components/node/delete-node-dialog.tsx`
+- `apps/web/src/components/file/file-upload-zone.tsx`
+- `apps/web/src/components/file/file-preview.tsx`
+- `apps/web/src/components/file/file-list-item.tsx`
+- `apps/web/src/components/file/index.ts`
+- `apps/web/src/hooks/use-file-upload.ts`
+
+### Files Modified
+- `apps/web/src/app/projects/[projectId]/page.tsx` - Integrated all forms
+- `apps/web/src/components/node/node-detail-panel.tsx` - Added version history button
+- `apps/web/src/components/ui/button.tsx` - Restored glass variants
+- `apps/web/src/components/ui/alert-dialog.tsx` - Added via shadcn
+
+---
+
+## [2026-01-31] V2 Phase 4: Tree View Complete
+
+### Summary
+Completed Phase 4 of GlassBox V2 Frontend with file explorer-style tree view, node display components, and detail panel.
+
+### Justification
+The tree view is essential for navigating hierarchical node structures. Users need to see parent-child relationships, expand/collapse branches, and view node details.
+
+### Technical Details
+
+**Node Display Components (`components/node/`):**
+- `NodeStatusBadge` - Badge with status-specific colors and icons
+- `NodeAuthorBadge` - Human/Agent indicator with icons
+- `NodeIcon` - Dynamic icon based on node characteristics
+- `NodeDetailPanel` - Full detail view with metadata, inputs, outputs
+- `NodeInputsList` - List of node inputs with type icons
+- `NodeOutputsList` - List of node outputs with type icons
+
+**Tree Components (`components/tree/`):**
+- `TreeView` - Main container, builds parent-child map, handles state
+- `TreeNode` - Individual node row with expand/collapse, selection, actions
+- `TreeBranch` - Recursive container for rendering children
+
+**Project Page (`app/projects/[projectId]/page.tsx`):**
+- Split layout: tree on left, detail panel on right
+- Protected route with ProtectedRoute wrapper
+- Node CRUD stubs (edit, delete, add child, execute)
+
+**Key Features:**
+- Hierarchical tree rendering from flat node list
+- Expand/collapse with chevron click or double-click
+- Auto-expand ancestors when selecting nested node
+- Keyboard navigation (Enter, Space, Arrow keys)
+- Hover-to-reveal actions and badges
+- Resizable detail panel (fixed 384px width)
+
+### Files Created
+- `apps/web/src/components/node/node-status-badge.tsx`
+- `apps/web/src/components/node/node-author-badge.tsx`
+- `apps/web/src/components/node/node-icon.tsx`
+- `apps/web/src/components/node/node-detail-panel.tsx`
+- `apps/web/src/components/node/node-inputs-list.tsx`
+- `apps/web/src/components/node/node-outputs-list.tsx`
+- `apps/web/src/components/node/index.ts`
+- `apps/web/src/components/tree/tree-view.tsx`
+- `apps/web/src/components/tree/tree-node.tsx`
+- `apps/web/src/components/tree/tree-branch.tsx`
+- `apps/web/src/components/tree/index.ts`
+- `apps/web/src/app/projects/[projectId]/page.tsx`
+
+### Files Modified
+- `docs/v2/ROADMAP.md` - Marked Phase 4 complete
+
+---
+
 ## [2026-01-31] V2 Phase 3: Organization & Project Management Complete
 
 ### Summary
