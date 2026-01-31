@@ -9,6 +9,65 @@ This document logs all significant changes made during development. Each entry i
 
 ---
 
+## [2026-01-31] V2 Phase 10: Agent Execution UI
+
+### Summary
+Completed Phase 10 with a comprehensive agent execution UI. Includes execution status badges, progress tracking, trace timeline visualization, and human-in-the-loop (HITL) modal components.
+
+### Justification
+GlassBox's core value proposition is transparent agent execution. Users need to see what agents are doing in real-time, review execution traces, and respond to HITL intervention requests.
+
+### Technical Details
+
+**Execution Store (`stores/execution-store.ts`):**
+- Zustand store managing active executions by node ID
+- Tracks execution status, progress updates, and HITL requests
+- Selectors for active execution and running executions
+
+**Execution Components (`components/agent/`):**
+- `ExecutionStatusBadge` - Status indicator with icons (pending, running, paused, complete, failed, cancelled)
+- `ExecutionProgress` - Progress bar with current step and token usage
+- `ExecutionControls` - Start/pause/resume/cancel buttons with tooltips
+- `ExecutionPanel` - Full execution view with controls, progress, and trace access
+
+**Trace Visualization:**
+- `TraceTimeline` - Scrollable timeline of execution events
+- `TraceEvent` - Individual event rendering with type-specific content
+- Event types: execution_start, llm_call, tool_call, decision, human_input_requested, human_input_received, subnode_created, output_added, error, checkpoint, execution_complete
+- Filter chips to show/hide specific event types
+- Auto-scroll to new events during active execution
+- Stats bar showing event count, LLM calls, tool calls, token usage
+
+**HITL Components:**
+- `HITLModal` - Modal showing pending intervention requests
+- `HITLInputRequest` - Free text or radio button input collection
+- `HITLApprovalRequest` - Approve/reject action requests
+- `HITLNotificationButton` - Header notification with badge count
+
+**Execution Hook (`hooks/use-execution.ts`):**
+- `useExecution` hook providing execution actions
+- Mock execution simulation for development/demo
+- Simulates LLM calls, tool calls, HITL requests, and completion
+
+### Files Modified
+- Created: `stores/execution-store.ts`
+- Created: `components/agent/execution-status-badge.tsx`
+- Created: `components/agent/execution-progress.tsx`
+- Created: `components/agent/execution-controls.tsx`
+- Created: `components/agent/execution-panel.tsx`
+- Created: `components/agent/trace-timeline.tsx`
+- Created: `components/agent/trace-event.tsx`
+- Created: `components/agent/hitl-modal.tsx`
+- Created: `components/agent/hitl-input-request.tsx`
+- Created: `components/agent/hitl-approval-request.tsx`
+- Created: `components/agent/index.ts`
+- Created: `hooks/use-execution.ts`
+- Added: `components/ui/radio-group.tsx` (shadcn)
+- Added: `components/ui/textarea.tsx` (shadcn)
+- Modified: `app/projects/[projectId]/page.tsx` - Integrated execution UI, HITL modal, execution panel
+
+---
+
 ## [2026-01-31] V2 Phase 8: Grid View (Hierarchical File Explorer)
 
 ### Summary

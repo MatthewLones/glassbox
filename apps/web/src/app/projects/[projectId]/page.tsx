@@ -31,6 +31,8 @@ import { useProject } from '@/hooks/use-projects';
 import { useNodes, useDeleteNode } from '@/hooks/use-nodes';
 import { useAppStore } from '@/stores/app-store';
 import { toast } from 'sonner';
+import { useExecution } from '@/hooks/use-execution';
+import { HITLModal, HITLNotificationButton, ExecutionPanel } from '@/components/agent';
 import type { Node } from '@glassbox/shared-types';
 
 // Mock data for development/demo
@@ -197,6 +199,15 @@ function ProjectContent() {
     a: NodeVersion | null;
     b: NodeVersion | null;
   }>({ a: null, b: null });
+  const [showHITLModal, setShowHITLModal] = React.useState(false);
+  const [showExecutionPanel, setShowExecutionPanel] = React.useState(false);
+
+  // Execution hook
+  const {
+    hitlRequests,
+    startExecution,
+    isNodeExecuting,
+  } = useExecution();
 
   // Delete mutation
   const deleteNode = useDeleteNode(nodeToDelete?.id || '');
@@ -266,9 +277,25 @@ function ProjectContent() {
     setShowCreateNode(true);
   }
 
-  function handleExecuteNode(node: Node) {
-    // TODO: Start agent execution
-    toast.info('Agent execution coming soon');
+  async function handleExecuteNode(node: Node) {
+    if (node.authorType !== 'agent') {
+      toast.error('Only agent-authored nodes can be executed');
+      return;
+    }
+
+    if (isNodeExecuting(node.id)) {
+      setShowExecutionPanel(true);
+      return;
+    }
+
+    try {
+      await startExecution(node.id);
+      setShowExecutionPanel(true);
+      toast.success('Execution started');
+    } catch (error) {
+      console.error('Failed to start execution:', error);
+      toast.error('Failed to start execution');
+    }
   }
 
   function handleAddEvidence() {
@@ -335,6 +362,7 @@ function ProjectContent() {
             title={project?.name || 'Project'}
             actions={
               <div className="flex items-center gap-3">
+                <HITLNotificationButton onClick={() => setShowHITLModal(true)} />
                 <ViewSwitcher
                   value={viewMode}
                   onChange={setViewMode}
@@ -520,6 +548,24 @@ function ProjectContent() {
             versionB={diffVersions.b}
           />
         </>
+      )}
+
+      {/* HITL Modal */}
+      <HITLModal
+        open={showHITLModal}
+        onOpenChange={setShowHITLModal}
+      />
+
+      {/* Execution Panel (as a slide-out or modal when needed) */}
+      {showExecutionPanel && selectedNode && (
+        <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-background border-l shadow-lg z-50">
+          <ExecutionPanel
+            node={selectedNode}
+            onClose={() => setShowExecutionPanel(false)}
+            onStartExecution={() => handleExecuteNode(selectedNode)}
+            className="h-full"
+          />
+        </div>
       )}
     </AppShell>
   );
